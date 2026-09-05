@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { marked } from 'marked';
+
+const allNotes = await getCollection('notes');
+const sortedNotes = allNotes.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Custom marked renderer to wrap images in a container for golden ratio display
+const renderer = {
+  image({ href, title, text }) {
+    const titleAttr = title ? ` title="${title}"` : '';
+    return `<div class="note-img-wrap"><img src="${href}" alt="${text}"${titleAttr} loading="lazy" /></div>`;
+  }
+};
+marked.use({ renderer });
+
+const notesHtml = await Promise.all(
+  sortedNotes.map(async (note) => ({
+    slug: note.id,
+    date: note.data.date,
+    html: marked.parse(note.body || ''),
+  }))
+);
+// Reset renderer to avoid affecting other pages
+marked.use({ renderer: { image: undefined } });
+---
+
+<BaseLayout title="说说" description="日常随想" searchScope="notes">
+  <div class="mb-8 flex items-center justify-between">
+    <h1 class="text-2xl font-bold uppercase tracking-tighter">说说</h1>
+    <span class="text-xs uppercase tracking-wider text-gray-500">
+      共 {sortedNotes.length} 条
+    </span>
+  </div>
+
+  {notesHtml.length > 0 ? (
+    <div class="space-y-2">
+      {notesHtml.map((note) => (
+        <div class="border border-black p-3">
+          <time class="mb-1 block text-xs uppercase tracking-wider text-gray-400">
+            {note.date.toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </time>
+          <div class="note-content prose prose-sm max-w-none" set:html={note.html}></div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div class="border border-black p-12 text-center">
+      <p class="text-sm text-gray-500">暂无说说</p>
+    </div>
+  )}
+</BaseLayout>
+
+<script>
+  // Detect image orientation and apply golden ratio sizing
+  document.addEventListener('DOMContentLoaded', () => {
+    const wraps = document.querySelectorAll('.note-img-wrap');
+    wraps.forEach((wrap) => {
+      const img = wrap.querySelector('img');
+      if (!img) return;
+      if (img.complete) {
+        applyGoldenRatio(wrap, img);
+      } else {
+        img.addEventListener('load', () => applyGoldenRatio(wrap, img));
+      }
+    });
+  });
+
+  function applyGoldenRatio(wrap, img) {
+    const isLandscape = img.naturalWidth > img.naturalHeight;
+    wrap.classList.add(isLandscape ? 'landscape' : 'portrait');
+  }
+</script>

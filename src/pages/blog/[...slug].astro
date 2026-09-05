@@ -1,0 +1,123 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import CommentSystem from '../../components/CommentSystem.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog')).filter((p) => !p.data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const hasUpdated = post.data.updated && post.data.updated.getTime() !== post.data.date.getTime();
+const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  authorName={post.data.author}
+  ogType="article"
+  publishedTime={post.data.date}
+  modifiedTime={post.data.updated}
+  tags={post.data.tags}
+  searchScope="blog"
+>
+  <article class="md:grid md:grid-cols-[1fr_200px] md:gap-8">
+    <div>
+      <header class="mb-8 border-b border-black pb-6">
+        <div class="mb-2 flex flex-wrap items-center gap-2 text-xs uppercase tracking-wider text-gray-500">
+          {post.data.category && (
+            <span class="border border-gray-300 px-2 py-0.5">{post.data.category}</span>
+          )}
+          {post.data.author && (
+            <span class="flex items-center gap-1">
+              <Icon name="user" size={12} />
+              {post.data.author}
+            </span>
+          )}
+        </div>
+
+        <h1 class="mb-3 text-3xl font-bold tracking-tighter">
+          {post.data.title}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs uppercase tracking-wider text-gray-500">
+          <time datetime={post.data.date.toISOString()}>
+            {post.data.date.toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+          {hasUpdated && (
+            <span>
+              更新于 {post.data.updated!.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </span>
+          )}
+          {post.data.tags.length > 0 && (
+            <>
+              <span class="text-gray-300">/</span>
+              {post.data.tags.map((tag: string) => (
+                <a
+                  href={`/blog?tag=${tag}`}
+                  class="border border-gray-300 px-2 py-0.5 text-[10px] transition-colors hover:bg-black hover:text-white"
+                >
+                  {tag}
+                </a>
+              ))}
+            </>
+          )}
+        </div>
+      </header>
+
+      <div class="prose prose-lg max-w-none">
+        <Content />
+      </div>
+
+      <CommentSystem />
+    </div>
+
+    <!-- Table of Contents -->
+    {toc.length > 0 && (
+      <aside class="hidden md:block">
+        <div class="sticky top-24 border border-black p-4 text-sm">
+          <h3 class="mb-3 text-xs font-bold uppercase tracking-wider">目录</h3>
+          <ul class="space-y-1.5">
+            {toc.map((h) => (
+              <li>
+                <a
+                  href={`#${h.slug}`}
+                  class={`block text-gray-600 transition-colors hover:text-black ${
+                    h.depth === 3 ? 'pl-3 text-[11px]' : 'text-xs'
+                  }`}
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+    )}
+  </article>
+
+  <footer class="mt-12 border-t border-black pt-6">
+    <a
+      href="/blog"
+      class="flex items-center gap-1 text-xs uppercase tracking-wider underline underline-offset-4 transition-colors hover:text-gray-500"
+    >
+      <Icon name="arrow-left" size={14} />
+      返回文章列表
+    </a>
+  </footer>
+</BaseLayout>

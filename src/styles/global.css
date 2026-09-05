@@ -1,0 +1,277 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* === Design Tokens — Light (default) === */
+:root {
+  --color-bg: #ffffff;
+  --color-fg: #111111;
+  --color-muted: #666666;
+  --color-border: #d4d4d4;
+  --color-hover: #f5f5f5;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-card: #ffffff;
+  --color-inline-code: #e64553;
+  --color-code-bg: #f0f0f0;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* === Design Tokens — Dark === */
+.dark {
+  --color-bg: #111111;
+  --color-fg: #e0e0e0;
+  --color-muted: #888888;
+  --color-border: #333333;
+  --color-hover: #1a1a1a;
+  --color-black: #ffffff;
+  --color-white: #111111;
+  --color-card: #181818;
+  --color-inline-code: #f07178;
+  --color-code-bg: #1a1a2e;
+}
+
+/* === Base Reset === */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* === Prose overrides for @tailwindcss/typography === */
+.prose {
+  --tw-prose-body: var(--color-fg);
+  --tw-prose-headings: var(--color-black);
+  --tw-prose-links: var(--color-black);
+  --tw-prose-bold: var(--color-black);
+  --tw-prose-quotes: var(--color-fg);
+  --tw-prose-quote-borders: var(--color-black);
+  --tw-prose-hr: var(--color-border);
+  --tw-prose-th-borders: var(--color-black);
+  --tw-prose-td-borders: var(--color-border);
+  max-width: none;
+}
+
+/* Code blocks get color (not pure black/white) */
+.prose pre {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #313244;
+}
+
+.prose code {
+  font-weight: 500;
+  padding: 0.15em 0.3em;
+  background: var(--color-code-bg);
+  font-size: 0.875em;
+  color: var(--color-inline-code);
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+  color: #cdd6f4;
+}
+
+.prose img {
+  border: 1px solid var(--color-border);
+}
+
+.prose blockquote {
+  font-style: normal;
+  color: var(--color-muted);
+}
+
+/* === Cards === */
+.bg-white, .bg-black {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* === Lucide icon sizing === */
+.lucide {
+  width: 1.25em;
+  height: 1.25em;
+  stroke-width: 1.5;
+}
+
+/* === Selection === */
+::selection {
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-hover);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+}
+
+/* === Transition helper === */
+.transition-colors {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+/* === Golden ratio (φ ≈ 1.618) image display for notes === */
+.note-img-wrap {
+  display: inline-block;
+  font-size: 0;
+  line-height: 0;
+  margin: 2px;
+  border: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+/* Landscape: image scaled to fit golden ratio 1.618:1 bounds */
+.note-img-wrap.landscape img {
+  max-width: 260px;
+  max-height: 160px;
+  height: auto;
+  display: block;
+}
+
+/* Portrait: image scaled to fit golden ratio 1:1.618 bounds */
+.note-img-wrap.portrait img {
+  max-width: 160px;
+  max-height: 260px;
+  height: auto;
+  display: block;
+}
+
+/* Remove paragraph margins when a note consists only of images */
+.note-content p {
+  margin: 0;
+}
+
+/* Compact text in notes */
+.note-content p:not(:empty) {
+  margin: 4px 0;
+}
+
+.note-content blockquote {
+  border-left: 2px solid var(--color-black);
+  padding-left: 12px;
+  margin: 4px 0;
+  color: var(--color-muted);
+  font-style: normal;
+}
+
+/* === Mobile responsive === */
+@media (max-width: 640px) {
+  main {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .note-img-wrap.landscape img {
+    max-width: 180px;
+    max-height: 110px;
+  }
+
+  .note-img-wrap.portrait img {
+    max-width: 110px;
+    max-height: 180px;
+  }
+}
+
+/* === Theme toggle button === */
+.theme-toggle {
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-fg);
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--color-hover);
+}
+
+.dark .theme-toggle .sun-icon {
+  display: block;
+}
+.dark .theme-toggle .moon-icon {
+  display: none;
+}
+.theme-toggle .sun-icon {
+  display: none;
+}
+.theme-toggle .moon-icon {
+  display: block;
+}
+
+/* === Dark mode overrides for Tailwind utility classes === */
+.dark {
+  color-scheme: dark;
+}
+
+.dark .bg-white {
+  background-color: #181818 !important;
+}
+.dark .bg-black {
+  background-color: #ffffff !important;
+}
+.dark .text-black {
+  color: #e0e0e0 !important;
+}
+.dark .text-white {
+  color: #111111 !important;
+}
+.dark .border-black {
+  border-color: #444444 !important;
+}
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: #333333 !important;
+}
+.dark .text-gray-300,
+.dark .text-gray-400,
+.dark .text-gray-500 {
+  color: #888888 !important;
+}
+.dark .hover\:bg-gray-100:hover {
+  background-color: #1a1a1a !important;
+}
+.dark .hover\:bg-gray-50:hover {
+  background-color: #181818 !important;
+}
+.dark .bg-gray-100 {
+  background-color: #1a1a1a !important;
+}
+
+/* === Tag color variants === */
+.tag-pill {
+  border: 1px solid var(--color-border);
+  transition: all 0.15s ease;
+}
+.tag-pill:hover {
+  opacity: 0.7;
+}
+.tag-pill.active {
+  background: var(--color-black) !important;
+  color: var(--color-white) !important;
+  border-color: var(--color-black) !important;
+}

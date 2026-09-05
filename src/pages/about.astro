@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { author, social } from '../config';
+---
+
+<BaseLayout title="关于" description="关于我" searchScope="all">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold uppercase tracking-tighter">关于</h1>
+  </div>
+
+  <div class="border border-black p-8">
+    <div class="mb-6 flex items-center gap-4">
+      <div class="flex h-16 w-16 items-center justify-center border border-black bg-black text-white">
+        {author.avatar
+          ? <img src={author.avatar} alt={author.name} class="h-full w-full object-cover" />
+          : <Icon name="user" size={32} />
+        }
+      </div>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight">{author.name}</h2>
+        <p class="text-sm text-gray-500">{author.bio}</p>
+      </div>
+    </div>
+
+    <div class="prose prose-sm max-w-none">
+      <p>
+        这里是岚潮的小窝。设计上追求简洁、清晰，
+        全部使用直角和黑白配色，没有任何圆角或渐变。
+      </p>
+      <p>
+        博客包含文章、项目、归档、说说、友链等功能模块。
+        文章使用 Markdown 编写，通过 Astro Content Collections 管理。
+      </p>
+
+      <h3>技术栈</h3>
+      <div class="flex flex-wrap gap-2">
+        {['Astro', 'Vue 3', 'Tailwind CSS', 'Lucide', 'Fuse.js', 'marked'].map((tech) => (
+          <span class="inline-block border border-black px-2 py-0.5 text-xs uppercase tracking-wider">
+            {tech}
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- 联系方式 -->
+  <div class="mt-8 grid gap-4 md:grid-cols-3">
+    {social.map((link) => (
+      <a
+        href={link.url}
+        target={link.url.startsWith('mailto:') ? undefined : '_blank'}
+        rel="noopener noreferrer"
+        class="flex items-center justify-center gap-2 border border-black p-4 text-sm font-bold uppercase tracking-wider transition-colors hover:bg-black hover:text-white"
+      >
+        <Icon name={link.icon} size={16} />
+        {link.label}
+      </a>
+    ))}
+  </div>
+</BaseLayout>

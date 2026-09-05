@@ -1,0 +1,28 @@
+---
+import ArtalkComments from './ArtalkComments.vue';
+import { comment as commentCfg } from '../config';
+
+const comment = commentCfg;
+const enabled = comment.enabled && comment.server && !comment.server.includes('xxx');
+const path = Astro.url.pathname;
+---
+
+{enabled && (
+  <section class="comment-system mt-12 border-t border-black pt-8">
+    <h3 class="mb-6 text-sm font-bold uppercase tracking-wider">评论</h3>
+    <ArtalkComments client:load server={comment.server} site={comment.site} locale={comment.locale} path={path} />
+  </section>
+)}
+
+{!enabled && comment.enabled && (
+  <section class="comment-system mt-12 border-t border-black pt-8">
+    <h3 class="mb-6 text-sm font-bold uppercase tracking-wider">评论</h3>
+    <div class="border border-black p-6 text-center text-sm text-gray-500">
+      <p>评论系统已启用，但尚未配置服务端地址。</p>
+      <p class="mt-2">
+        请编辑 <code class="bg-gray-100 px-1">src/config.ts</code> 中的
+        <code class="bg-gray-100 px-1">comment.server</code>
+      </p>
+    </div>
+  </section>
+)}

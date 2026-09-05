@@ -1,0 +1,37 @@
+---
+import Icon from './Icon.astro';
+
+export interface Friend {
+  name: string;
+  url: string;
+  description?: string;
+}
+
+export interface Props {
+  friends: Friend[];
+}
+
+const { friends } = Astro.props;
+---
+
+<div class="grid gap-4 sm:grid-cols-2">
+  {friends.map((friend) => (
+    <a
+      href={friend.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group flex items-center gap-3 border border-black p-4 transition-colors hover:bg-gray-100"
+    >
+      <div class="flex h-10 w-10 items-center justify-center border border-black bg-black text-white">
+        <Icon name="link" size={20} />
+      </div>
+      <div class="min-w-0 flex-1">
+        <h3 class="text-sm font-bold tracking-tight">{friend.name}</h3>
+        {friend.description && (
+          <p class="truncate text-xs text-gray-500">{friend.description}</p>
+        )}
+      </div>
+      <Icon name="arrow-up-right" size={16} class="shrink-0 text-gray-400 group-hover:text-black" />
+    </a>
+  ))}
+</div>

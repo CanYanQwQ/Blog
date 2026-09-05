@@ -1,0 +1,163 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site, author, seo, features, footer as footerCfg } from '../config';
+import { getCollection } from 'astro:content';
+import { marked } from 'marked';
+
+export interface Props {
+  title: string;
+  description?: string;
+  authorName?: string;
+  ogType?: 'website' | 'article';
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  tags?: string[];
+  noindex?: boolean;
+  /** Search scope: 'all' | 'blog' | 'projects' | 'notes' | 'archive' */
+  searchScope?: string;
+}
+
+const {
+  title,
+  description,
+  authorName,
+  ogType = 'website',
+  publishedTime,
+  modifiedTime,
+  tags = [],
+  noindex = false,
+  searchScope = 'all',
+} = Astro.props;
+const desc = description || site.description;
+const canonicalUrl = new URL(Astro.url.pathname, site.url).toString();
+const imageUrl = seo.ogImage ? new URL(seo.ogImage, site.url).toString() : undefined;
+const pageAuthor = authorName || author.name;
+const publishedIso = publishedTime?.toISOString();
+const modifiedIso = modifiedTime?.toISOString() || publishedIso;
+const robotsContent = noindex ? 'noindex, follow' : 'index, follow';
+
+const structuredData = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': ogType === 'article' ? 'BlogPosting' : 'WebPage',
+  name: title,
+  description: desc,
+  url: canonicalUrl,
+  inLanguage: site.lang,
+  ...(ogType === 'article' && {
+    headline: title,
+    datePublished: publishedIso,
+    dateModified: modifiedIso,
+    author: {
+      '@type': 'Person',
+      name: pageAuthor,
+      ...(author.website && { url: author.website }),
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
+  }),
+}).replace(/</g, '\\u003c');
+
+// Build search index for global search
+const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
+const allProjects = await getCollection('projects');
+const allNotes = await getCollection('notes');
+
+const searchItems = [
+  ...allPosts.map((p) => ({
+    title: p.data.title,
+    description: p.data.description,
+    url: `/blog/${p.id}`,
+    type: '文章',
+    keywords: (p.data.tags || []).join(' '),
+  })),
+  ...allProjects.map((p) => {
+    const repoName = p.data.repo?.match(/github\.com\/([^/]+)\/([^/]+?)(?:\/|$)/)?.[2]?.replace(/\.git$/, '') || p.data.repo || '项目';
+    return {
+      title: repoName,
+      description: 'GitHub 项目',
+      url: `/projects`,
+      type: '项目',
+      keywords: '',
+    };
+  }),
+  ...allNotes.map((n) => ({
+    title: n.body?.substring(0, 60).replace(/[#*`!\[\]]/g, '') || '说说',
+    description: n.body?.substring(0, 120).replace(/[#*`!\[\]]/g, '') || '',
+    url: `/notes`,
+    type: '说说',
+    keywords: '',
+  })),
+];
+
+// Filter by scope
+const filteredItems = searchScope === 'all'
+  ? searchItems
+  : searchItems.filter((item) => {
+      if (searchScope === 'blog') return item.type === '文章';
+      if (searchScope === 'projects') return item.type === '项目';
+      if (searchScope === 'notes') return item.type === '说说';
+      if (searchScope === 'archive') return item.type === '文章';
+      return true;
+    });
+---
+
+<!DOCTYPE html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={desc} />
+    <meta name="author" content={pageAuthor} />
+    <meta name="robots" content={robotsContent} />
+    <title>{title} — {site.title}</title>
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:locale" content={site.lang.replace('-', '_')} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={site.title} />
+    {imageUrl && (
+      <>
+        <meta property="og:image" content={imageUrl} />
+        <meta property="og:image:alt" content={title} />
+      </>
+    )}
+    <meta name="twitter:card" content={seo.twitterCard} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={desc} />
+    {imageUrl && <meta name="twitter:image" content={imageUrl} />}
+    {ogType === 'article' && publishedIso && (
+      <>
+        <meta property="article:published_time" content={publishedIso} />
+        <meta property="article:modified_time" content={modifiedIso} />
+        <meta property="article:author" content={pageAuthor} />
+        {tags.map((tag) => <meta property="article:tag" content={tag} />)}
+      </>
+    )}
+    <script is:inline type="application/ld+json" set:html={structuredData}></script>
+    <link rel="alternate" type="application/rss+xml" title={site.title} href="/rss.xml" />
+    <script is:inline>
+      (function() {
+        var stored = localStorage.getItem('theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefers)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <Header searchItems={filteredItems} />
+    <main class="mx-auto w-full max-w-4xl flex-1 px-6 py-8">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

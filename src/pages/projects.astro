@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+
+const allProjects = await getCollection('projects');
+
+// Fetch all project data from GitHub API
+const projectsWithData = await Promise.all(
+  allProjects.map(async (project) => {
+    const match = project.data.repo.match(/github\.com\/([^/]+)\/([^/]+?)(?:\/|$)/);
+    if (!match) {
+      return { ...project, title: '未知项目', description: '', tech: [], stars: 0, forks: 0 };
+    }
+    const [, owner, repoName] = match;
+    try {
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repoName.replace(/\.git$/, '')}`);
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          ...project,
+          title: data.name || repoName,
+          description: data.description || '',
+          tech: [data.language, ...(data.topics || [])].filter(Boolean),
+          stars: data.stargazers_count ?? 0,
+          forks: data.forks_count ?? 0,
+        };
+      }
+    } catch {
+      // GitHub API not available
+    }
+    return {
+      ...project,
+      title: repoName,
+      description: '',
+      tech: [],
+      stars: 0,
+      forks: 0,
+    };
+  })
+);
+
+const sortedProjects = projectsWithData.sort((a, b) => b.stars - a.stars);
+---
+
+<BaseLayout title="项目" description="我的项目" searchScope="projects">
+  <div class="mb-8 flex items-center justify-between">
+    <h1 class="text-2xl font-bold uppercase tracking-tighter">项目</h1>
+    <span class="text-xs uppercase tracking-wider text-gray-500">
+      共 {sortedProjects.length} 个项目
+    </span>
+  </div>
+
+  {sortedProjects.length > 0 ? (
+    <div class="grid gap-4 md:grid-cols-2">
+      {sortedProjects.map((project) => (
+        <ProjectCard
+          title={project.title}
+          description={project.description}
+          tech={project.tech}
+          repo={project.data.repo}
+          stars={project.stars}
+          forks={project.forks}
+        />
+      ))}
+    </div>
+  ) : (
+    <div class="border border-black p-12 text-center">
+      <p class="text-sm text-gray-500">暂无项目</p>
+    </div>
+  )}
+</BaseLayout>

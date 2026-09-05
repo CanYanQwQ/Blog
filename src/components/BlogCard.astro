@@ -1,0 +1,43 @@
+---
+export interface Props {
+  title: string;
+  description: string;
+  date: Date;
+  tags?: string[];
+  slug: string;
+  category?: string;
+}
+
+const { title, description, date, tags = [], slug, category } = Astro.props;
+const formattedDate = date.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+---
+
+<article class="group border border-black bg-white">
+  <a href={`/blog/${slug}`} class="block p-6 transition-colors">
+    <div class="mb-2 flex items-center gap-2 text-xs uppercase tracking-wider">
+      <time datetime={date.toISOString()}>{formattedDate}</time>
+      {category && (
+        <span class="border border-current px-1.5 py-0.5 text-[10px]">{category}</span>
+      )}
+    </div>
+    <h2 class="mb-2 text-lg font-bold leading-snug tracking-tight">
+      {title}
+    </h2>
+    <p class="mb-3 text-sm leading-relaxed text-gray-500">
+      {description}
+    </p>
+    {tags.length > 0 && (
+      <div class="flex flex-wrap gap-1.5">
+        {tags.map((tag) => (
+          <span class="border border-black px-2 py-0.5 text-xs uppercase tracking-wider">
+            {tag}
+          </span>
+        ))}
+      </div>
+    )}
+  </a>
+</article>

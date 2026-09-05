@@ -1,0 +1,112 @@
+---
+import Icon from './Icon.astro';
+import GlobalSearch from './GlobalSearch.vue';
+import { site, nav, features } from '../config';
+
+export interface Props {
+  searchItems?: any[];
+}
+
+const { searchItems = [] } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<header class="border-b border-black">
+  <div class="mx-auto max-w-4xl px-4 md:px-6">
+    <div class="flex items-center justify-between py-3">
+      <a
+        href="/"
+        class="text-lg font-bold tracking-tighter uppercase hover:opacity-60 transition-colors shrink-0"
+      >
+        {site.title}
+      </a>
+      <nav class="hidden items-center gap-1 md:flex">
+        {nav.map((item) => (
+          <a
+            href={item.path}
+            class={`flex items-center gap-1.5 px-2.5 py-1 text-sm uppercase tracking-wide transition-colors ${
+              currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path))
+                ? 'bg-black text-white'
+                : 'text-black hover:bg-gray-100'
+            }`}
+          >
+            <Icon name={item.icon} size={14} />
+            <span>{item.label}</span>
+          </a>
+        ))}
+      </nav>
+      <div class="flex items-center gap-2">
+        {features.darkModeToggle && (
+          <button id="theme-toggle" class="theme-toggle" aria-label="切换主题">
+            <Icon name="sun" size={16} class="sun-icon" />
+            <Icon name="moon" size={16} class="moon-icon" />
+          </button>
+        )}
+        <button id="mobile-menu-btn" class="block md:hidden" aria-label="菜单">
+          <Icon name="menu" size={20} />
+        </button>
+      </div>
+    </div>
+    <!-- Search bar -->
+    {features.search && (
+      <div class="pb-3">
+        <GlobalSearch client:load items={JSON.stringify(searchItems)} />
+      </div>
+    )}
+  </div>
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden border-t border-black md:hidden">
+    <div class="grid grid-cols-2 gap-1 px-4 py-3">
+      {nav.map((item) => (
+          <a
+            href={item.path}
+            class={`flex items-center gap-2 px-3 py-2.5 text-sm uppercase tracking-wide border border-gray-200 transition-colors ${
+              currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path))
+                ? 'bg-black text-white'
+                : 'text-black hover:bg-gray-100'
+            }`}
+          >
+            <Icon name={item.icon} size={16} />
+            <span>{item.label}</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</header>
+
+<script>
+  // Mobile menu toggle
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  if (btn && menu) {
+    btn.addEventListener('click', () => {
+      menu.classList.toggle('hidden');
+    });
+  }
+
+  // Theme toggle
+  (function () {
+    const toggle = document.getElementById('theme-toggle');
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initial = stored || (prefersDark ? 'dark' : 'light');
+    setTheme(initial);
+
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+        setTheme(next);
+        localStorage.setItem('theme', next);
+      });
+    }
+  })();
+
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+</script>

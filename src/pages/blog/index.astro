@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import Icon from '../../components/Icon.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
+const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const tags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))].sort();
+---
+
+<BaseLayout title="文章" description="所有博客文章" searchScope="blog">
+  <div class="mb-8 flex items-center justify-between">
+    <h1 class="text-2xl font-bold uppercase tracking-tighter">文章</h1>
+    <span id="post-count" class="text-xs uppercase tracking-wider text-gray-500">
+      共 {sortedPosts.length} 篇
+    </span>
+  </div>
+
+  <!-- Tags filter -->
+  {tags.length > 0 && (
+    <div class="mb-8 flex flex-wrap gap-2">
+      <a
+        id="clear-tag"
+        href="#"
+        onclick="clearTag(); return false;"
+        class="tag-pill border border-black px-3 py-1 text-xs uppercase tracking-wider transition-colors hover:bg-gray-100"
+      >
+        全部文章
+      </a>
+      {tags.map((tag) => (
+        <a
+          href="#"
+          data-tag={tag}
+          onclick={`filterTag('${tag}'); return false;`}
+          class="tag-pill border border-black px-3 py-1 text-xs uppercase tracking-wider transition-colors hover:bg-gray-100"
+        >
+          {tag}
+        </a>
+      ))}
+    </div>
+  )}
+
+  <!-- Posts list -->
+  <div id="post-list" class="space-y-4">
+    {sortedPosts.length > 0 ? (
+      sortedPosts.map((post) => (
+        <div data-post-tags={(post.data.tags || []).join(',')} data-slug={post.id}>
+          <BlogCard
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date}
+            tags={post.data.tags}
+            slug={post.id}
+            category={post.data.category}
+          />
+        </div>
+      ))
+    ) : (
+      <div class="border border-black p-12 text-center">
+        <p class="text-sm text-gray-500">暂无文章</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  let activeTag = new URLSearchParams(window.location.search).get('tag') || null;
+
+  function updateFilter() {
+    const items = document.querySelectorAll('#post-list > div');
+    const countEl = document.getElementById('post-count');
+    const pills = document.querySelectorAll('.tag-pill');
+    let visible = 0;
+
+    items.forEach((item) => {
+      const tags = (item.getAttribute('data-post-tags') || '').split(',');
+      const show = !activeTag || tags.includes(activeTag);
+      item.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    if (countEl) countEl.textContent = `共 ${visible} 篇${activeTag ? `（标签：${activeTag}）` : ''}`;
+    pills.forEach((pill) => {
+      const isActive = pill.id === 'clear-tag' ? !activeTag : pill.getAttribute('data-tag') === activeTag;
+      pill.classList.toggle('bg-black', isActive);
+      pill.classList.toggle('text-white', isActive);
+    });
+  }
+
+  function filterTag(tag) {
+    activeTag = activeTag === tag ? null : tag;
+    updateFilter();
+  }
+
+  function clearTag() {
+    activeTag = null;
+    updateFilter();
+  }
+
+  // Initialize on load
+  updateFilter();
+</script>

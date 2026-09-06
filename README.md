@@ -1,4 +1,4 @@
-# 极简博客岚潮的小窝
+# 岚潮的小窝
 
 一个基于 **Astro 7** + **Vue 3** + **Tailwind CSS v4** 构建的极简风格静态博客。
 
@@ -46,7 +46,7 @@
 | `/archive` | 归档 | `archive` | 按年/月归档，链接到文章详情 |
 | `/notes` | 说说 | `notes` | 微笔记时间线，支持 Markdown 和图片 |
 | `/friends` | 友链 | `all` | 友链网格展示 |
-| `/about` | 关于 | `all` | 个人介绍 + 联系方式 + 技术栈 |
+| `/daily` | 恋爱日常 | `all` | 恋爱计时卡 + md 日常记录 |
 | `/search` | 搜索 | `all` | 独立搜索页，Fuse.js 全文搜索 |
 | `/rss.xml` | RSS 订阅 | — | 自动生成，按发布日期排序 |
 
@@ -102,7 +102,7 @@ astro dev stop            # 停止后台服务器
 ## 项目结构
 
 ```
-极简博客岚潮的小窝/
+岚潮的小窝/
 ├── public/                    # 静态资源（直接复制到构建输出）
 │   ├── favicon.ico
 │   └── favicon.svg
@@ -133,7 +133,7 @@ astro dev stop            # 停止后台服务器
 │   │   ├── archive.astro      # 归档页（按年/月分组）
 │   │   ├── notes.astro        # 说说页（marked 渲染 + 黄金比例图片）
 │   │   ├── friends.astro      # 友链页
-│   │   ├── about.astro        # 关于页
+│   │   ├── daily.astro        # 恋爱日常页（计时卡 + md 日常）
 │   │   ├── search.astro       # 独立搜索页
 │   │   └── rss.xml.js         # RSS 生成端点
 │   ├── content/               # 内容集合（数据源）
@@ -247,7 +247,7 @@ description: 站点描述
 | `site.ts` | `title`、`description`、`url`、`lang`、`timezone` | 站点基本信息 |
 | `author.ts` | `name`、`email`、`avatar`、`bio`、`website` | 作者信息 |
 | `nav.ts` | `label`、`path`、`icon` | 导航菜单（数组） |
-| `social.ts` | `label`、`url`、`icon` | 社交链接（数组，展示在关于页） |
+| `social.ts` | `label`、`url`、`icon` | 社交链接（数组，展示在首页） |
 | `comment.ts` | `enabled`、`server`、`site`、`locale` | 评论系统 |
 | `theme.ts` | `default` | 默认主题模式（`light` / `dark` / `auto`） |
 | `blog.ts` | `pageSize` | 文章列表每页条数 |
@@ -271,7 +271,7 @@ description: 站点描述
 **搜索范围控制：**
 `BaseLayout` 接收 `searchScope` prop，自动过滤搜索结果：
 
-- `all` —— 首页、友链、关于，搜索所有内容
+- `all` —— 首页、友链，搜索所有内容
 - `blog` —— 文章列表 / 详情 / 归档，只搜文章
 - `projects` —— 只搜项目
 - `notes` —— 只搜说说

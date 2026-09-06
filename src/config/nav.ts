@@ -8,7 +8,7 @@ export interface NavItem {
   icon: string;
 }
 
-/** 顶部导航菜单 */
+/** 博客区导航（显示在侧边栏「博客区」分组下） */
 export const nav: NavItem[] = [
   { label: '首页', path: '/', icon: 'home' },
   { label: '文章', path: '/blog', icon: 'file-text' },
@@ -16,5 +16,9 @@ export const nav: NavItem[] = [
   { label: '归档', path: '/archive', icon: 'archive' },
   { label: '说说', path: '/notes', icon: 'message-square' },
   { label: '友链', path: '/friends', icon: 'link' },
-  { label: '关于', path: '/about', icon: 'user' },
+];
+
+/** 「更多」分组 */
+export const more: NavItem[] = [
+  { label: '恋爱日常', path: '/daily', icon: 'heart' },
 ];

@@ -1,0 +1,165 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { getCollection, render } from 'astro:content';
+import { marked } from 'marked';
+import { daily } from '../config';
+
+const allDaily = (await getCollection('daily')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+// Custom marked renderer to wrap images for consistent display
+const renderer = {
+  image({ href, title, text }) {
+    const titleAttr = title ? ` title="${title}"` : '';
+    return `<div class="note-img-wrap"><img src="${href}" alt="${text}"${titleAttr} loading="lazy" /></div>`;
+  }
+};
+marked.use({ renderer });
+const dailyHtml = await Promise.all(
+  allDaily.map(async (d) => ({
+    slug: d.id,
+    date: d.data.date,
+    html: marked.parse(d.body || ''),
+  }))
+);
+marked.use({ renderer: { image: undefined } });
+---
+
+<BaseLayout title="恋爱日常" description="我和宝宝的恋爱日常" searchScope="all">
+  <!-- Relationship timer — centered, no card box -->
+  <div class="relationship-card mb-12 py-4 text-center" data-start={daily.startDate}>
+    <!-- Header -->
+    <h1 class="font-display mx-auto mb-2 max-w-xl text-2xl font-semibold tracking-tight text-ink md:text-3xl">
+      {daily.title}
+    </h1>
+    <p class="mb-8 flex items-center justify-center gap-2 text-sm text-muted">
+      <Icon name="heart" size={14} class="text-accent" />
+      记录我们在一起的每一天
+      <Icon name="heart" size={14} class="text-accent" />
+    </p>
+
+    <!-- Avatars / initials + love icon -->
+    <div class="mb-6 flex items-center justify-center gap-5">
+      <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-[3px] border-accent bg-soft text-xl font-bold text-ink shadow-sm transition-transform hover:scale-110 md:h-20 md:w-20 md:text-2xl">
+        {daily.avatars.left ? (
+          <img src={daily.avatars.left} alt={daily.names.left} class="h-full w-full object-cover" />
+        ) : (
+          daily.names.left.slice(0, 1)
+        )}
+      </div>
+      <div class="flex-shrink-0 animate-pulse text-accent select-none">
+        <Icon name="heart" size={36} />
+      </div>
+      <div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-[3px] border-accent bg-soft text-xl font-bold text-ink shadow-sm transition-transform hover:scale-110 md:h-20 md:w-20 md:text-2xl">
+        {daily.avatars.right ? (
+          <img src={daily.avatars.right} alt={daily.names.right} class="h-full w-full object-cover" />
+        ) : (
+          daily.names.right.slice(0, 1)
+        )}
+      </div>
+    </div>
+
+    <!-- Names -->
+    <div class="mb-8 flex items-center justify-center gap-3 text-base font-semibold text-ink">
+      <span class="rounded-inner border border-line px-3 py-1">{daily.names.left}</span>
+      <span class="animate-pulse text-lg text-accent flex-shrink-0">♥</span>
+      <span class="rounded-inner border border-line px-3 py-1">{daily.names.right}</span>
+    </div>
+
+    <!-- Timer: year / month / day -->
+    <div class="mx-auto mb-5 grid max-w-md grid-cols-3 gap-3">
+      <div class="flex flex-col items-center">
+        <span class="timer-years font-display text-5xl font-semibold leading-none text-ink" data-timer-years>0</span>
+        <span class="mt-2 text-sm font-semibold tracking-wide" style="color: #3b82f6">年</span>
+      </div>
+      <div class="flex flex-col items-center">
+        <span class="timer-months font-display text-5xl font-semibold leading-none text-ink" data-timer-months>0</span>
+        <span class="mt-2 text-sm font-semibold tracking-wide" style="color: #ef4444">月</span>
+      </div>
+      <div class="flex flex-col items-center">
+        <span class="timer-days font-display text-5xl font-semibold leading-none text-ink" data-timer-days>0</span>
+        <span class="mt-2 text-sm font-semibold tracking-wide" style="color: #ec4899">天</span>
+      </div>
+    </div>
+
+    <!-- Timer: hours / minutes / seconds -->
+    <div class="flex items-center justify-center gap-1 text-muted">
+      <span class="font-mono text-lg font-bold tabular-nums text-ink" data-timer-hours>00</span>
+      <span class="mr-1.5 text-xs">时</span>
+      <span class="font-mono text-lg font-bold tabular-nums text-ink" data-timer-minutes>00</span>
+      <span class="mr-1.5 text-xs">分</span>
+      <span class="font-mono text-lg font-bold tabular-nums text-ink" data-timer-seconds>00</span>
+      <span class="text-xs">秒</span>
+    </div>
+  </div>
+
+  <!-- Daily entries -->
+  <section>
+    <div class="mb-4 flex items-center justify-between border-b border-line pb-4">
+      <h2 class="font-display text-xl font-semibold tracking-tight text-ink">恋爱日常</h2>
+      <span class="text-sm text-muted">共 {dailyHtml.length} 篇</span>
+    </div>
+
+    {dailyHtml.length > 0 ? (
+      <div class="space-y-3">
+        {dailyHtml.map((entry) => (
+          <div class="card-surface p-4 transition-colors hover:border-accent">
+            <time class="mb-1 block text-xs text-muted">
+              {entry.date.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
+            <div class="prose prose-sm max-w-none" set:html={entry.html}></div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="card-surface p-12 text-center">
+        <p class="text-sm text-muted">还没有恋爱日常记录，去写一篇吧</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>
+
+<script>
+  // Relationship timer — count up from start date (inspired by blog.tsh520.cn)
+  (function () {
+    const card = document.querySelector('.relationship-card');
+    const startDateStr = card?.getAttribute('data-start') || '2026-01-06';
+    function updateRelationshipTimer() {
+      const startDate = new Date(startDateStr);
+      const now = new Date();
+      let diff = now.getTime() - startDate.getTime();
+      if (diff < 0) return;
+      const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+      let years = now.getFullYear() - startDate.getFullYear();
+      let months = now.getMonth() - startDate.getMonth();
+      let days = now.getDate() - startDate.getDate();
+      let hours = now.getHours() - startDate.getHours();
+      let minutes = now.getMinutes() - startDate.getMinutes();
+      let seconds = now.getSeconds() - startDate.getSeconds();
+      if (seconds < 0) { seconds += 60; minutes--; }
+      if (minutes < 0) { minutes += 60; hours--; }
+      if (hours < 0) { hours += 24; days--; }
+      if (days < 0) { const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0); days += lastMonth.getDate(); months--; }
+      if (months < 0) { months += 12; years--; }
+      const set = (attr, value) => {
+        document.querySelectorAll(`[data-timer-${attr}]`).forEach((el) => { el.innerText = value; });
+      };
+      set('years', years);
+      set('months', months);
+      set('days', days);
+      set('hours', String(hours).padStart(2, '0'));
+      set('minutes', String(minutes).padStart(2, '0'));
+      set('seconds', String(seconds).padStart(2, '0'));
+    }
+    updateRelationshipTimer();
+    if (!window.relationshipTimerInterval) {
+      window.relationshipTimerInterval = setInterval(updateRelationshipTimer, 1000);
+    }
+  })();
+</script>

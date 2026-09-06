@@ -1,21 +1,28 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BlogCard from '../../components/BlogCard.astro';
+import GlobalSearch from '../../components/GlobalSearch.vue';
 import Icon from '../../components/Icon.astro';
 import { getCollection } from 'astro:content';
+import { buildSearchIndex, filterByScope } from '../../lib/search';
 
 const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
 const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 const tags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))].sort();
+const searchItems = filterByScope(await buildSearchIndex(), 'blog');
 ---
 
 <BaseLayout title="文章" description="所有博客文章" searchScope="blog">
-  <div class="mb-8 flex items-center justify-between">
-    <h1 class="text-2xl font-bold uppercase tracking-tighter">文章</h1>
-    <span id="post-count" class="text-xs uppercase tracking-wider text-gray-500">
+  <div class="mb-8 flex items-end justify-between border-b border-line pb-6">
+    <h1 class="font-display text-3xl font-semibold tracking-tight text-ink">文章</h1>
+    <span id="post-count" class="text-sm text-muted">
       共 {sortedPosts.length} 篇
     </span>
+  </div>
+
+  <div class="mb-8">
+    <GlobalSearch client:load items={JSON.stringify(searchItems)} />
   </div>
 
   <!-- Tags filter -->
@@ -25,7 +32,7 @@ const tags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))].sort();
         id="clear-tag"
         href="#"
         onclick="clearTag(); return false;"
-        class="tag-pill border border-black px-3 py-1 text-xs uppercase tracking-wider transition-colors hover:bg-gray-100"
+        class="tag-pill px-3 py-1 text-sm transition-colors"
       >
         全部文章
       </a>
@@ -34,7 +41,7 @@ const tags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))].sort();
           href="#"
           data-tag={tag}
           onclick={`filterTag('${tag}'); return false;`}
-          class="tag-pill border border-black px-3 py-1 text-xs uppercase tracking-wider transition-colors hover:bg-gray-100"
+          class="tag-pill px-3 py-1 text-sm transition-colors"
         >
           {tag}
         </a>
@@ -42,11 +49,11 @@ const tags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))].sort();
     </div>
   )}
 
-  <!-- Posts list -->
-  <div id="post-list" class="space-y-4">
+  <!-- Posts grid: 1 col on mobile, 2 on tablet, 3 on desktop -->
+  <div id="post-list" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
     {sortedPosts.length > 0 ? (
       sortedPosts.map((post) => (
-        <div data-post-tags={(post.data.tags || []).join(',')} data-slug={post.id}>
+        <div data-post-tags={(post.data.tags || []).join(',')} data-slug={post.id} class="min-w-0">
           <BlogCard
             title={post.data.title}
             description={post.data.description}
@@ -58,8 +65,8 @@ const tags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))].sort();
         </div>
       ))
     ) : (
-      <div class="border border-black p-12 text-center">
-        <p class="text-sm text-gray-500">暂无文章</p>
+      <div class="card-surface p-12 text-center md:col-span-2 lg:col-span-3">
+        <p class="text-sm text-muted">暂无文章</p>
       </div>
     )}
   </div>
@@ -84,8 +91,7 @@ const tags = [...new Set(sortedPosts.flatMap((p) => p.data.tags))].sort();
     if (countEl) countEl.textContent = `共 ${visible} 篇${activeTag ? `（标签：${activeTag}）` : ''}`;
     pills.forEach((pill) => {
       const isActive = pill.id === 'clear-tag' ? !activeTag : pill.getAttribute('data-tag') === activeTag;
-      pill.classList.toggle('bg-black', isActive);
-      pill.classList.toggle('text-white', isActive);
+      pill.classList.toggle('active', isActive);
     });
   }
 

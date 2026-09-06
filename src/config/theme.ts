@@ -5,5 +5,5 @@ export interface ThemeConfig {
 }
 
 export const theme: ThemeConfig = {
-  default: 'auto',
+  default: 'dark',
 };

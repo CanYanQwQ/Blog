@@ -1,21 +1,21 @@
 <template>
-  <div class="global-search relative">
-    <div class="flex items-center border border-black bg-white">
-      <span class="flex items-center pl-3 text-gray-400">
+  <div class="global-search relative w-full">
+    <div class="flex items-center rounded-panel border border-line bg-card">
+      <span class="flex items-center pl-3 text-muted">
         <Search :size="16" stroke-width="1.5" />
       </span>
       <input
         v-model="query"
         type="text"
         placeholder="搜索..."
-        class="w-full border-none bg-transparent px-2 py-2 text-sm outline-none"
+        class="w-full border-none bg-transparent px-2 py-2 text-sm outline-none text-ink placeholder:text-muted"
         @input="handleSearch"
         @focus="showDropdown = true"
         @blur="hideDropdown"
       />
       <button
         v-if="query"
-        class="flex items-center px-2 py-2 text-gray-400 hover:text-black"
+        class="flex items-center px-2 py-2 text-muted hover:text-accent"
         @mousedown.prevent="clearSearch"
       >
         <X :size="14" stroke-width="1.5" />
@@ -24,27 +24,27 @@
 
     <div
       v-if="showDropdown && query && results.length > 0"
-      class="absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-y-auto border border-black bg-white shadow-lg"
+      class="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto rounded-panel border border-line bg-card shadow-lg"
     >
       <a
         v-for="(result, i) in results"
         :key="i"
         :href="result.url"
-        class="block border-b border-gray-100 px-4 py-3 text-sm transition-colors hover:bg-gray-100 last:border-0"
+        class="block border-b border-line px-4 py-3 text-sm transition-colors hover:bg-soft last:border-0"
       >
         <div class="flex items-center gap-2">
-          <span class="shrink-0 rounded-none border border-gray-300 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-gray-500">
+          <span class="shrink-0 rounded-inner border border-line px-1.5 py-0.5 text-[10px] text-muted">
             {{ result.type }}
           </span>
-          <span class="font-medium">{{ result.title }}</span>
+          <span class="font-medium text-ink">{{ result.title }}</span>
         </div>
-        <p class="mt-0.5 text-xs text-gray-500 line-clamp-1">{{ result.description }}</p>
+        <p class="mt-0.5 line-clamp-1 text-xs text-muted">{{ result.description }}</p>
       </a>
     </div>
 
     <div
       v-if="showDropdown && query && results.length === 0"
-      class="absolute left-0 right-0 top-full z-50 mt-1 border border-black bg-white p-4 text-center text-xs text-gray-400"
+      class="absolute left-0 right-0 top-full z-50 mt-2 rounded-panel border border-line bg-card p-4 text-center text-xs text-muted"
     >
       无结果
     </div>

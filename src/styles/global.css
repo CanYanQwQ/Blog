@@ -1,41 +1,82 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* === Design Tokens — Light (default) === */
-:root {
-  --color-bg: #ffffff;
-  --color-fg: #111111;
-  --color-muted: #666666;
-  --color-border: #d4d4d4;
-  --color-hover: #f5f5f5;
-  --color-black: #000000;
-  --color-white: #ffffff;
-  --color-card: #ffffff;
-  --color-inline-code: #e64553;
-  --color-code-bg: #f0f0f0;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+/*
+ * Design tokens — Inspired-by-AcoFork warm editorial system.
+ * Light: warm off-white paper with warm ink + terracotta accent.
+ * Dark:  near-replica of acofork's deep warm charcoal.
+ *
+ * AcroFork reference values kept where they feel right:
+ *   dark bg #1b1b19, fg #faf9f5, accent #cc785c, muted #b0aea5.
+ */
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-soft: var(--soft);
+  --color-card: var(--card);
+  --color-nested: var(--nested);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-line: var(--sidebar-line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-on-accent: var(--on-accent);
+  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display: "Lora Variable", Georgia, "Songti SC", "STSong", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-/* === Design Tokens — Dark === */
+/* === Light — warm off-white paper & ink === */
+:root {
+  --paper: #faf9f5;            /* warm off-white */
+  --ink: #1b1b19;              /* near-black warm ink */
+  --muted: #5f5d55;            /* warm taupe muted */
+  --line: #e3e0d4;             /* warm hairline */
+  --soft: #f1efe6;             /* soft hover surface */
+  --card: #ffffff;             /* elevated card */
+  --nested: #f4f2ea;           /* nested card */
+  --sidebar: #f1eee5;          /* sidebar: slightly darker than paper */
+  --sidebar-line: #ded8c8;     /* sidebar divider */
+  --accent: #b84a24;           /* terracotta, AA on light paper */
+  --accent-soft: #f4e3d1;      /* pale terracotta tint */
+  --accent-foreground: #faf9f5;
+  --on-accent: #faf9f5;
+  --code-bg: #f1efe6;
+  --color-inline-code: #a2441f;
+  --color-code-block-bg: #1c1a16;
+  --color-code-block-fg: #e9e4d8;
+  --color-code-block-line: #3a352c;
+}
+
+/* === Dark — AcoFork-exact warm charcoal, split sidebar vs content === */
 .dark {
-  --color-bg: #111111;
-  --color-fg: #e0e0e0;
-  --color-muted: #888888;
-  --color-border: #333333;
-  --color-hover: #1a1a1a;
-  --color-black: #ffffff;
-  --color-white: #111111;
-  --color-card: #181818;
-  --color-inline-code: #f07178;
-  --color-code-bg: #1a1a2e;
+  --paper: #1b1b19;            /* acofork background — content zone */
+  --ink: #faf9f5;              /* acofork foreground */
+  --muted: #b0aea5;            /* acofork muted-foreground */
+  --line: rgba(255, 255, 255, 0.14); /* acofork border ~/24% */
+  --soft: #26241f;             /* hover surface */
+  --card: #2e2e2c;             /* warm card ~oklch(30%) */
+  --nested: #383836;           /* nested card ~oklch(34%) */
+  --sidebar: #141414;          /* sidebar: deeper than content for split */
+  --sidebar-line: rgba(255, 255, 255, 0.14);
+  --accent: #cc785c;           /* acofork primary / ring */
+  --accent-soft: #3a2a1c;      /* deep warm accent tint */
+  --accent-foreground: #141413;
+  --on-accent: #141413;
+  --code-bg: #2b2923;
+  --color-inline-code: #e08b6e;
+  --color-code-block-bg: #141311;
+  --color-code-block-fg: #e8e4d8;
+  --color-code-block-line: #3a352c;
 }
 
 /* === Base Reset === */
 *,
 *::before,
 *::after {
-  border-radius: 0 !important;
   box-sizing: border-box;
 }
 
@@ -43,235 +84,271 @@ html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
+/* Subtle dot grid only in light mode; AcoFork-style flat in dark */
 body {
-  background: var(--color-bg);
-  color: var(--color-fg);
-  min-height: 100vh;
+  background-color: var(--paper);
+  color: var(--ink);
+  min-height: 100dvh;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.5;
+}
+
+/* === Radius scaled in from AcoFork's 8px-ish system === */
+:root {
+  --radius: 0.5rem;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-lg: calc(var(--radius) * 1.25);
+}
+
+/* curl-in some utilities for radius (used by shadcn-like cards) */
+.rounded-panel {
+  border-radius: var(--radius-lg) !important;
+}
+.rounded-inner {
+  border-radius: var(--radius-sm) !important;
+}
+/* By default the site is square/straight (kept for the blog's identity),
+   but cards, search, inputs, pills get a hint of softness like AcoFork. */
+.card-surface {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: var(--radius-lg);
+}
+
+/* === Type helpers === */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 /* === Prose overrides for @tailwindcss/typography === */
 .prose {
-  --tw-prose-body: var(--color-fg);
-  --tw-prose-headings: var(--color-black);
-  --tw-prose-links: var(--color-black);
-  --tw-prose-bold: var(--color-black);
-  --tw-prose-quotes: var(--color-fg);
-  --tw-prose-quote-borders: var(--color-black);
-  --tw-prose-hr: var(--color-border);
-  --tw-prose-th-borders: var(--color-black);
-  --tw-prose-td-borders: var(--color-border);
+  --tw-prose-body: var(--ink);
+  --tw-prose-headings: var(--ink);
+  --tw-prose-links: var(--accent);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-quotes: var(--muted);
+  --tw-prose-quote-borders: var(--accent);
+  --tw-prose-hr: var(--line);
+  --tw-prose-th-borders: var(--ink);
+  --tw-prose-td-borders: var(--line);
+  --tw-prose-counters: var(--muted);
+  --tw-prose-bullets: var(--accent);
   max-width: none;
 }
-
-/* Code blocks get color (not pure black/white) */
-.prose pre {
-  background: #1e1e2e;
-  color: #cdd6f4;
-  border: 1px solid #313244;
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-family: var(--font-display);
+  line-height: 1.25;
 }
-
+.prose pre {
+  background: var(--color-code-block-bg);
+  color: var(--color-code-block-fg);
+  border: 1px solid var(--color-code-block-line);
+  border-radius: var(--radius-sm);
+}
 .prose code {
   font-weight: 500;
   padding: 0.15em 0.3em;
-  background: var(--color-code-bg);
+  background: var(--code-bg);
   font-size: 0.875em;
   color: var(--color-inline-code);
 }
-
 .prose pre code {
   background: transparent;
   padding: 0;
-  color: #cdd6f4;
+  color: var(--color-code-block-fg);
 }
-
 .prose img {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--line);
 }
-
 .prose blockquote {
   font-style: normal;
-  color: var(--color-muted);
+  color: var(--muted);
 }
 
-/* === Cards === */
-.bg-white, .bg-black {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+/* === Inputs & focus === */
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-/* === Lucide icon sizing === */
-.lucide {
-  width: 1.25em;
-  height: 1.25em;
-  stroke-width: 1.5;
+/* Search box: no outer orange ring on focus; instead the border warms to accent */
+.global-search :focus-visible,
+.search-bar :focus-visible {
+  outline: none;
+}
+.global-search:focus-within .flex,
+.search-bar:focus-within .flex {
+  border-color: var(--accent);
 }
 
-/* === Selection === */
-::selection {
-  background: var(--color-black);
-  color: var(--color-white);
+/* === Theme toggle === */
+.theme-toggle {
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  padding: 6px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  transition: all 0.15s ease;
+  border-radius: var(--radius-sm);
+  touch-action: manipulation;
 }
+.theme-toggle:hover {
+  background: var(--soft);
+  color: var(--accent);
+}
+/* Larger tap target on touch devices */
+@media (pointer: coarse) {
+  .theme-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+.dark .theme-toggle .sun-icon { display: block; }
+.dark .theme-toggle .moon-icon { display: none; }
+.theme-toggle .sun-icon { display: none; }
+.theme-toggle .moon-icon { display: block; }
 
-/* === Scrollbar === */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-hover);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-muted);
-}
-
-/* === Transition helper === */
+/* === Transitions === */
 .transition-colors {
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-/* === Golden ratio (φ ≈ 1.618) image display for notes === */
+/* === Scrollbar === */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--soft); }
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  opacity: 0.7;
+  border-radius: 4px;
+}
+
+/* === Selection & caret === */
+::selection { background: var(--accent); color: var(--accent-foreground); }
+
+/* === Tag pills (AcoFork-style chips) === */
+.tag-pill {
+  border: 1px solid var(--line);
+  color: var(--muted);
+  transition: all 0.15s ease;
+  background: transparent;
+  border-radius: var(--radius-sm);
+}
+.tag-pill:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.tag-pill.active {
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+  border-color: var(--accent) !important;
+}
+
+/* === Card surfaces used via utility dark overrides === */
+.card-surface:not(.group) .text-ink,
+.card-surface .text-muted {
+  color: inherit;
+}
+
+/* Preserve a crisp read surface for note images */
 .note-img-wrap {
   display: inline-block;
   font-size: 0;
   line-height: 0;
   margin: 2px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   vertical-align: top;
 }
-
-/* Landscape: image scaled to fit golden ratio 1.618:1 bounds */
-.note-img-wrap.landscape img {
-  max-width: 260px;
-  max-height: 160px;
-  height: auto;
-  display: block;
-}
-
-/* Portrait: image scaled to fit golden ratio 1:1.618 bounds */
-.note-img-wrap.portrait img {
-  max-width: 160px;
-  max-height: 260px;
-  height: auto;
-  display: block;
-}
-
-/* Remove paragraph margins when a note consists only of images */
-.note-content p {
-  margin: 0;
-}
-
-/* Compact text in notes */
-.note-content p:not(:empty) {
-  margin: 4px 0;
-}
-
+.note-img-wrap.landscape img { max-width: 260px; max-height: 160px; height: auto; display: block; }
+.note-img-wrap.portrait img { max-width: 160px; max-height: 260px; height: auto; display: block; }
+.note-content p { margin: 0; }
+.note-content p:not(:empty) { margin: 4px 0; }
 .note-content blockquote {
-  border-left: 2px solid var(--color-black);
+  border-left: 2px solid var(--accent);
   padding-left: 12px;
   margin: 4px 0;
-  color: var(--color-muted);
+  color: var(--muted);
   font-style: normal;
 }
 
-/* === Mobile responsive === */
 @media (max-width: 640px) {
-  main {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
+  main { padding-left: 16px !important; padding-right: 16px !important; }
+  .note-img-wrap.landscape img { max-width: 180px; max-height: 110px; }
+  .note-img-wrap.portrait img { max-width: 110px; max-height: 180px; }
 
-  .note-img-wrap.landscape img {
-    max-width: 180px;
-    max-height: 110px;
+  /* Safe-area insets for notched phones */
+  .mobile-topbar {
+    padding-top: env(safe-area-inset-top);
   }
-
-  .note-img-wrap.portrait img {
-    max-width: 110px;
-    max-height: 180px;
+  footer {
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
   }
 }
 
-/* === Theme toggle button === */
-.theme-toggle {
-  cursor: pointer;
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-fg);
-  padding: 4px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
+/* Touch-friendly interactive elements: ensure generous tap targets on touch devices */
+@media (pointer: coarse) {
+  .theme-toggle,
+  #mobile-menu-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  #mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tag-pill {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+  }
+  .global-search input,
+  .search-bar input {
+    min-height: 40px;
+  }
 }
 
-.theme-toggle:hover {
-  background: var(--color-hover);
-}
-
-.dark .theme-toggle .sun-icon {
-  display: block;
-}
-.dark .theme-toggle .moon-icon {
-  display: none;
-}
-.theme-toggle .sun-icon {
-  display: none;
-}
-.theme-toggle .moon-icon {
-  display: block;
-}
-
-/* === Dark mode overrides for Tailwind utility classes === */
+/* === Dark-mode neutralization of Tailwind hard-coded colors === */
 .dark {
   color-scheme: dark;
 }
-
-.dark .bg-white {
-  background-color: #181818 !important;
+.dark .bg-white { background-color: var(--card) !important; }
+.dark .bg-black { background-color: var(--ink) !important; }
+.dark .text-black { color: var(--ink) !important; }
+.dark .text-white { color: var(--paper) !important; }
+.dark .border-black { border-color: var(--ink) !important; }
+.dark .border-gray-200, .dark .border-gray-300 { border-color: var(--line) !important; }
+.dark .text-gray-300, .dark .text-gray-400, .dark .text-gray-500, .dark .text-gray-600 {
+  color: var(--muted) !important;
 }
-.dark .bg-black {
-  background-color: #ffffff !important;
-}
-.dark .text-black {
-  color: #e0e0e0 !important;
-}
-.dark .text-white {
-  color: #111111 !important;
-}
-.dark .border-black {
-  border-color: #444444 !important;
-}
-.dark .border-gray-200,
-.dark .border-gray-300 {
-  border-color: #333333 !important;
-}
-.dark .text-gray-300,
-.dark .text-gray-400,
-.dark .text-gray-500 {
-  color: #888888 !important;
-}
-.dark .hover\:bg-gray-100:hover {
-  background-color: #1a1a1a !important;
-}
-.dark .hover\:bg-gray-50:hover {
-  background-color: #181818 !important;
-}
-.dark .bg-gray-100 {
-  background-color: #1a1a1a !important;
-}
-
-/* === Tag color variants === */
-.tag-pill {
-  border: 1px solid var(--color-border);
-  transition: all 0.15s ease;
-}
-.tag-pill:hover {
-  opacity: 0.7;
-}
-.tag-pill.active {
-  background: var(--color-black) !important;
-  color: var(--color-white) !important;
-  border-color: var(--color-black) !important;
-}
+.dark .hover\:bg-gray-100:hover, .dark .hover\:bg-gray-50:hover { background-color: var(--soft) !important; }
+.dark .bg-gray-100 { background-color: var(--soft) !important; }

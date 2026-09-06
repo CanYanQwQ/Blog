@@ -3,25 +3,25 @@ import Icon from './Icon.astro';
 import { footer as footerCfg, author, features } from '../config';
 ---
 
-<footer class="border-t border-black">
-  <div class="mx-auto flex max-w-4xl flex-col items-center gap-3 px-4 py-6 text-sm text-gray-500 md:flex-row md:justify-between">
+<footer class="mt-10 border-t border-line">
+  <div class="flex flex-col items-center gap-3 py-6 text-sm text-muted md:flex-row md:justify-between">
     <p>&copy; {footerCfg.since}—{new Date().getFullYear()} {author.name}</p>
     {features.rss && (
       <div class="flex items-center gap-4">
         <a
           href="/rss.xml"
-          class="flex items-center gap-1 hover:text-black transition-colors"
+          class="flex items-center gap-1 text-muted hover:text-accent transition-colors"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="RSS"
         >
           <Icon name="rss" size={14} />
-          <span class="text-xs uppercase tracking-wider">RSS</span>
+          <span>RSS</span>
         </a>
       </div>
     )}
     {footerCfg.customText && (
-      <span class="text-xs">{footerCfg.customText}</span>
+      <span>{footerCfg.customText}</span>
     )}
   </div>
 </footer>

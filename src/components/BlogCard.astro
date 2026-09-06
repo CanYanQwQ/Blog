@@ -16,24 +16,24 @@ const formattedDate = date.toLocaleDateString('zh-CN', {
 });
 ---
 
-<article class="group border border-black bg-white">
-  <a href={`/blog/${slug}`} class="block p-6 transition-colors">
-    <div class="mb-2 flex items-center gap-2 text-xs uppercase tracking-wider">
+<article class="group h-full card-surface transition-colors hover:border-accent">
+  <a href={`/blog/${slug}`} class="flex h-full flex-col p-5 transition-colors">
+    <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted">
       <time datetime={date.toISOString()}>{formattedDate}</time>
       {category && (
-        <span class="border border-current px-1.5 py-0.5 text-[10px]">{category}</span>
+        <span class="border border-accent/30 px-1.5 py-0.5 text-[10px] text-accent">{category}</span>
       )}
     </div>
-    <h2 class="mb-2 text-lg font-bold leading-snug tracking-tight">
+    <h2 class="mb-2 text-base font-semibold leading-snug tracking-tight text-ink group-hover:text-accent transition-colors">
       {title}
     </h2>
-    <p class="mb-3 text-sm leading-relaxed text-gray-500">
+    <p class="mb-3 line-clamp-2 text-sm leading-relaxed text-muted">
       {description}
     </p>
     {tags.length > 0 && (
-      <div class="flex flex-wrap gap-1.5">
+      <div class="mt-auto flex flex-wrap gap-1.5">
         {tags.map((tag) => (
-          <span class="border border-black px-2 py-0.5 text-xs uppercase tracking-wider">
+          <span class="border border-line px-2 py-0.5 text-xs text-muted">
             {tag}
           </span>
         ))}

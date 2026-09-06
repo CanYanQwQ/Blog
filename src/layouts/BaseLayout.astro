@@ -2,8 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { site, author, seo, features, footer as footerCfg } from '../config';
-import { getCollection } from 'astro:content';
+import { site, author, seo, features, theme, footer as footerCfg } from '../config';
 import { marked } from 'marked';
 
 export interface Props {
@@ -60,57 +59,20 @@ const structuredData = JSON.stringify({
     },
   }),
 }).replace(/</g, '\\u003c');
-
-// Build search index for global search
-const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
-const allProjects = await getCollection('projects');
-const allNotes = await getCollection('notes');
-
-const searchItems = [
-  ...allPosts.map((p) => ({
-    title: p.data.title,
-    description: p.data.description,
-    url: `/blog/${p.id}`,
-    type: '文章',
-    keywords: (p.data.tags || []).join(' '),
-  })),
-  ...allProjects.map((p) => {
-    const repoName = p.data.repo?.match(/github\.com\/([^/]+)\/([^/]+?)(?:\/|$)/)?.[2]?.replace(/\.git$/, '') || p.data.repo || '项目';
-    return {
-      title: repoName,
-      description: 'GitHub 项目',
-      url: `/projects`,
-      type: '项目',
-      keywords: '',
-    };
-  }),
-  ...allNotes.map((n) => ({
-    title: n.body?.substring(0, 60).replace(/[#*`!\[\]]/g, '') || '说说',
-    description: n.body?.substring(0, 120).replace(/[#*`!\[\]]/g, '') || '',
-    url: `/notes`,
-    type: '说说',
-    keywords: '',
-  })),
-];
-
-// Filter by scope
-const filteredItems = searchScope === 'all'
-  ? searchItems
-  : searchItems.filter((item) => {
-      if (searchScope === 'blog') return item.type === '文章';
-      if (searchScope === 'projects') return item.type === '项目';
-      if (searchScope === 'notes') return item.type === '说说';
-      if (searchScope === 'archive') return item.type === '文章';
-      return true;
-    });
 ---
 
 <!DOCTYPE html>
-<html lang={site.lang}>
+<html lang={site.lang} data-theme-default={theme.default} class={theme.default === 'dark' ? 'dark' : undefined}>
   <head>
     <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={desc} />
     <meta name="author" content={pageAuthor} />
@@ -145,19 +107,34 @@ const filteredItems = searchScope === 'all'
     <link rel="alternate" type="application/rss+xml" title={site.title} href="/rss.xml" />
     <script is:inline>
       (function() {
+        // 'dark' | 'light' | 'auto' — set from config on the <html> element
+        var DEFAULT = document.documentElement.getAttribute('data-theme-default') || 'dark';
         var stored = localStorage.getItem('theme');
         var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (stored === 'dark' || (!stored && prefers)) {
+        var useDark;
+        if (stored === 'light' || stored === 'dark') {
+          // User has explicitly chosen — honour it
+          useDark = stored === 'dark';
+        } else if (DEFAULT === 'dark') {
+          // Default dark, regardless of system
+          useDark = true;
+        } else if (DEFAULT === 'light') {
+          useDark = false;
+        } else {
+          // 'auto' — follow system
+          useDark = prefers;
+        }
+        if (useDark) {
           document.documentElement.classList.add('dark');
         }
       })();
     </script>
   </head>
-  <body class="flex min-h-screen flex-col">
-    <Header searchItems={filteredItems} />
+  <body class="flex min-h-screen flex-col lg:flex-row">
+    <Header />
     <main class="mx-auto w-full max-w-4xl flex-1 px-6 py-8">
       <slot />
+      <Footer />
     </main>
-    <Footer />
   </body>
 </html>

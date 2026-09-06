@@ -1,14 +1,20 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BlogCard from '../components/BlogCard.astro';
+import Icon from '../components/Icon.astro';
 import { getCollection, render } from 'astro:content';
 import { marked } from 'marked';
-import { site } from '../config';
+import { site, author, social } from '../config';
 
 const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
 const allNotes = await getCollection('notes');
 const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const sortedNotes = allNotes.sort((a, b) => b.data.date.getTime() - a.data.date.getTime()).slice(0, 3);
+
+// Personal-homepage project destinations (from 个人主页 config)
+const homepageProjects = [
+  { name: '博客', url: 'https://blog.zhouwanx.top' },
+];
 
 // Custom marked renderer to wrap images for golden ratio display
 const renderer = {
@@ -29,25 +35,111 @@ marked.use({ renderer: { image: undefined } });
 ---
 
 <BaseLayout title="首页" searchScope="all">
-  <!-- Hero -->
-  <section class="mb-10 border-b border-black pb-6">
-    <h1 class="mb-2 text-3xl font-bold tracking-tighter uppercase">
-      {site.title}
-    </h1>
-    <p class="max-w-lg text-base text-gray-500">
-      {site.tagline}
-    </p>
+  <!-- Profile Hero -->
+  <section class="mb-10 border-b border-line pb-8 md:mb-12 md:pb-10">
+    <div class="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
+      <!-- Avatar -->
+      <div class="card-surface shrink-0 p-1.5">
+        {author.avatar ? (
+          <img
+            src={author.avatar}
+            alt={`${author.name} 的头像`}
+            class="h-24 w-24 rounded-inner object-cover md:h-28 md:w-28"
+            width="280"
+            height="280"
+          />
+        ) : (
+          <div class="flex h-24 w-24 items-center justify-center rounded-inner bg-accent text-accent-foreground md:h-28 md:w-28">
+            <Icon name="user" size={40} />
+          </div>
+        )}
+      </div>
+
+      <!-- Identity copy -->
+      <div class="min-w-0">
+        <h1 class="font-display mb-2 text-3xl font-semibold leading-tight tracking-tight text-ink md:text-4xl">
+          {author.name}
+        </h1>
+        {author.role && (
+          <p class="mb-2 w-fit border-b-2 border-accent pb-0.5 text-sm font-semibold text-ink">
+            {author.role}
+          </p>
+        )}
+        <p class="max-w-xl text-sm leading-relaxed text-muted md:text-base">
+          {author.bio || site.tagline}
+        </p>
+      </div>
+    </div>
+
+    <!-- Social links -->
+    {social.length > 0 && (
+      <div class="mt-6 flex flex-wrap gap-2">
+        {social.map((link) => (
+          <a
+            href={link.url}
+            target={link.url.startsWith('mailto:') ? undefined : '_blank'}
+            rel="noopener noreferrer"
+            class="flex items-center gap-2 rounded-inner border border-line bg-card px-3.5 py-2 text-sm font-medium text-muted transition-colors hover:border-accent hover:text-accent"
+            aria-label={link.label}
+          >
+            <Icon name={link.icon} size={16} />
+            {link.label}
+          </a>
+        ))}
+      </div>
+    )}
   </section>
 
+  <!-- Projects -->
+  {homepageProjects.length > 0 && (
+    <section class="mb-10 md:mb-12">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="font-display flex items-center gap-2 text-xl font-semibold tracking-tight text-ink">
+          项目
+        </h2>
+        <a
+          href="/projects"
+          class="flex items-center gap-1 text-sm text-accent hover:text-ink transition-colors"
+        >
+          查看全部
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2">
+        {homepageProjects.map((project) => {
+          const hostname = new URL(project.url).hostname;
+          return (
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="card-surface group flex items-center justify-between gap-4 p-5 transition-colors hover:border-accent"
+            >
+              <span class="min-w-0">
+                <strong class="font-display block text-lg font-semibold tracking-tight text-ink group-hover:text-accent transition-colors">
+                  {project.name}
+                </strong>
+                <small class="block overflow-wrap-anywhere text-xs text-muted">{hostname}</small>
+              </span>
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-inner border border-line text-muted group-hover:border-accent group-hover:text-accent transition-colors">
+                <Icon name="external-link" size={16} />
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
   <!-- Latest Posts -->
-  <section class="mb-10">
+  <section class="mb-10 md:mb-12">
     <div class="mb-4 flex items-center justify-between">
-      <h2 class="flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
+      <h2 class="font-display flex items-center gap-2 text-xl font-semibold tracking-tight text-ink">
         最新文章
       </h2>
       <a
         href="/blog"
-        class="flex items-center gap-1 text-xs uppercase tracking-wider underline underline-offset-4 hover:text-gray-500 transition-colors"
+        class="flex items-center gap-1 text-sm text-accent hover:text-ink transition-colors"
       >
         查看全部
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -70,21 +162,21 @@ marked.use({ renderer: { image: undefined } });
   {notesHtml.length > 0 && (
     <section>
       <div class="mb-4 flex items-center justify-between">
-        <h2 class="flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
+        <h2 class="font-display flex items-center gap-2 text-xl font-semibold tracking-tight text-ink">
           最新说说
         </h2>
         <a
           href="/notes"
-          class="flex items-center gap-1 text-xs uppercase tracking-wider underline underline-offset-4 hover:text-gray-500 transition-colors"
+          class="flex items-center gap-1 text-sm text-accent hover:text-ink transition-colors"
         >
           查看全部
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </a>
       </div>
-      <div class="space-y-2">
+      <div class="space-y-3">
         {notesHtml.map((note) => (
-          <div class="border border-black p-3">
-            <time class="mb-1 block text-xs uppercase tracking-wider text-gray-400">
+          <div class="card-surface p-4 transition-colors hover:border-accent">
+            <time class="mb-1 block text-xs text-muted">
               {note.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
             </time>
             <div class="prose prose-sm max-w-none" set:html={note.html}></div>

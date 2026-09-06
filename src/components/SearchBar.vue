@@ -1,19 +1,19 @@
 <template>
   <div class="search-bar">
-    <div class="mb-8 flex items-center border border-black bg-white">
-      <span class="flex items-center pl-4">
+    <div class="mb-8 flex items-center rounded-panel border border-line bg-card">
+      <span class="flex items-center pl-4 text-muted">
         <Search :size="18" stroke-width="1.5" />
       </span>
       <input
         v-model="query"
         type="text"
         placeholder="搜索文章..."
-        class="w-full border-none bg-transparent px-3 py-3 text-sm outline-none"
+        class="w-full border-none bg-transparent px-3 py-3 text-sm outline-none text-ink placeholder:text-muted"
         @input="handleSearch"
       />
       <button
         v-if="query"
-        class="flex items-center px-4 py-3 text-sm uppercase tracking-wider hover:bg-gray-100"
+        class="flex items-center px-4 py-3 text-sm text-muted hover:bg-soft hover:text-accent"
         @click="clearSearch"
       >
         <X :size="16" stroke-width="1.5" />
@@ -21,28 +21,28 @@
     </div>
 
     <div v-if="query && results.length > 0" class="space-y-3">
-      <p class="text-xs uppercase tracking-wider text-gray-500">
+      <p class="text-xs text-muted">
         找到 {{ results.length }} 篇结果
       </p>
       <a
         v-for="result in results"
         :key="result.slug"
         :href="`/blog/${result.slug}`"
-        class="group block border border-black p-4 transition-colors hover:bg-gray-100"
+        class="group card-surface block p-4 transition-colors hover:border-accent"
       >
-        <h3 class="mb-1 text-base font-bold tracking-tight" v-html="highlight(result.title)"></h3>
-        <p class="mb-2 text-sm text-gray-500" v-html="highlight(result.description)"></p>
-        <div class="flex items-center gap-2 text-xs text-gray-400">
+        <h3 class="mb-1 text-base font-semibold tracking-tight text-ink group-hover:text-accent" v-html="highlight(result.title)"></h3>
+        <p class="mb-2 text-sm text-muted" v-html="highlight(result.description)"></p>
+        <div class="flex items-center gap-2 text-xs text-muted">
           <time :datetime="result.date">{{ formatDate(result.date) }}</time>
-          <span v-for="tag in result.tags" :key="tag" class="border border-gray-300 px-1.5 py-0.5 text-[10px] uppercase tracking-wider">
+          <span v-for="tag in result.tags" :key="tag" class="rounded-inner border border-line px-1.5 py-0.5 text-[10px] text-muted">
             {{ tag }}
           </span>
         </div>
       </a>
     </div>
 
-    <div v-if="query && results.length === 0" class="border border-black p-8 text-center">
-      <p class="text-sm text-gray-500">没有找到相关文章</p>
+    <div v-if="query && results.length === 0" class="card-surface p-8 text-center">
+      <p class="text-sm text-muted">没有找到相关文章</p>
     </div>
   </div>
 </template>
@@ -107,7 +107,7 @@ function highlight(text: string): string {
   let result = text;
   for (const word of words) {
     const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    result = result.replace(new RegExp(`(${escaped})`, 'gi'), '<mark class="bg-black text-white px-0.5">$1</mark>');
+    result = result.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
   }
   return result;
 }
@@ -124,8 +124,8 @@ function formatDate(dateStr: string): string {
 
 <style scoped>
 mark {
-  background: #000;
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
   padding: 0 0.15em;
 }
 </style>

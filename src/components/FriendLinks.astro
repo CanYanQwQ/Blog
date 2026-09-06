@@ -20,18 +20,18 @@ const { friends } = Astro.props;
       href={friend.url}
       target="_blank"
       rel="noopener noreferrer"
-      class="group flex items-center gap-3 border border-black p-4 transition-colors hover:bg-gray-100"
+      class="group card-surface flex items-center gap-3 p-4 transition-colors hover:border-accent"
     >
-      <div class="flex h-10 w-10 items-center justify-center border border-black bg-black text-white">
+      <div class="flex h-10 w-10 items-center justify-center rounded-inner border border-line bg-accent text-accent-foreground">
         <Icon name="link" size={20} />
       </div>
       <div class="min-w-0 flex-1">
-        <h3 class="text-sm font-bold tracking-tight">{friend.name}</h3>
+        <h3 class="text-sm font-semibold tracking-tight text-ink group-hover:text-accent transition-colors">{friend.name}</h3>
         {friend.description && (
-          <p class="truncate text-xs text-gray-500">{friend.description}</p>
+          <p class="truncate text-xs text-muted">{friend.description}</p>
         )}
       </div>
-      <Icon name="arrow-up-right" size={16} class="shrink-0 text-gray-400 group-hover:text-black" />
+      <Icon name="arrow-up-right" size={16} class="shrink-0 text-muted group-hover:text-accent" />
     </a>
   ))}
 </div>

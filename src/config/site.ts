@@ -15,10 +15,10 @@ export interface SiteInfo {
 }
 
 export const site: SiteInfo = {
-  title: '极简博客岚潮的小窝',
-  description: '岚潮的小窝：一个极简风格的个人博客',
-  url: 'https://example.com',
+  title: '岚潮的小窝',
+  description: '残颜的博客：无业游民一枚，对 IT 和 AI 上头，日常靠 AGENT 编程自娱自乐。',
+  url: 'https://blog.zhouwanx.top',
   lang: 'zh-CN',
   timezone: 'Asia/Shanghai',
-  tagline: '岚潮的更小窝 — 记录、分享与探索',
+  tagline: '无业游民一枚，对 IT 和 AI 上头，日常靠 AGENT 编程自娱自乐。',
 };

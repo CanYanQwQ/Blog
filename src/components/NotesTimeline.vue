@@ -3,12 +3,12 @@
     <div
       v-for="note in sortedNotes"
       :key="note.slug"
-      class="relative border border-black p-5 transition-colors hover:bg-gray-50"
+      class="relative card-surface p-5 transition-colors hover:border-accent"
     >
       <!-- Timeline dot -->
-      <div class="absolute -left-2.5 top-6 h-4 w-4 border border-black bg-white"></div>
+      <div class="absolute -left-2.5 top-6 h-4 w-4 rounded-full border border-accent bg-card"></div>
 
-      <time class="block mb-2 text-xs uppercase tracking-wider text-gray-400">
+      <time class="block mb-2 text-xs text-muted">
         {{ formatDate(note.date) }}
       </time>
 
@@ -71,7 +71,7 @@ function formatDate(dateStr: string): string {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #000;
+  background: var(--accent);
 }
 
 .notes-timeline > div {

@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # local code-measure data
 .code-measure/
+
+# reference site source (个人主页 — not part of this blog)
+个人主页/

@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FriendLinks from '../components/FriendLinks.astro';
+import GlobalSearch from '../components/GlobalSearch.vue';
 import { getCollection } from 'astro:content';
+import { buildSearchIndex, filterByScope } from '../lib/search';
 
 const allFriends = await getCollection('friends');
 const friends = allFriends.map((f) => ({
@@ -9,21 +11,26 @@ const friends = allFriends.map((f) => ({
   url: f.data.url,
   description: f.data.description,
 }));
+const searchItems = filterByScope(await buildSearchIndex(), 'all');
 ---
 
 <BaseLayout title="友链" description="友情链接" searchScope="all">
-  <div class="mb-8 flex items-center justify-between">
-    <h1 class="text-2xl font-bold uppercase tracking-tighter">友链</h1>
-    <span class="text-xs uppercase tracking-wider text-gray-500">
+  <div class="mb-8 flex items-end justify-between border-b border-line pb-6">
+    <h1 class="font-display text-3xl font-semibold tracking-tight text-ink">友链</h1>
+    <span class="text-sm text-muted">
       共 {friends.length} 个站点
     </span>
+  </div>
+
+  <div class="mb-8">
+    <GlobalSearch client:load items={JSON.stringify(searchItems)} />
   </div>
 
   {friends.length > 0 ? (
     <FriendLinks friends={friends} />
   ) : (
-    <div class="border border-black p-12 text-center">
-      <p class="text-sm text-gray-500">暂无友链</p>
+    <div class="card-surface p-12 text-center">
+      <p class="text-sm text-muted">暂无友链</p>
     </div>
   )}
 </BaseLayout>

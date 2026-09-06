@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import GlobalSearch from '../components/GlobalSearch.vue';
 import { getCollection } from 'astro:content';
+import { buildSearchIndex, filterByScope } from '../lib/search';
 
 const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
 const sortedPosts = allPosts.sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
@@ -34,37 +36,42 @@ for (const [year, monthMap] of archiveMap) {
 archive.sort((a, b) => b.year - a.year);
 
 const totalPosts = sortedPosts.length;
+const searchItems = filterByScope(await buildSearchIndex(), 'archive');
 ---
 
 <BaseLayout title="归档" description="文章归档" searchScope="archive">
-  <div class="mb-8 flex items-center justify-between">
-    <h1 class="text-2xl font-bold uppercase tracking-tighter">归档</h1>
-    <span class="text-xs uppercase tracking-wider text-gray-500">
+  <div class="mb-8 flex items-end justify-between border-b border-line pb-6">
+    <h1 class="font-display text-3xl font-semibold tracking-tight text-ink">归档</h1>
+    <span class="text-sm text-muted">
       共 {totalPosts} 篇
     </span>
+  </div>
+
+  <div class="mb-8">
+    <GlobalSearch client:load items={JSON.stringify(searchItems)} />
   </div>
 
   {archive.length > 0 ? (
     <div class="space-y-10">
       {archive.map((yearGroup) => (
         <section>
-          <h2 class="mb-4 text-lg font-bold tracking-tight">{yearGroup.year}</h2>
+          <h2 class="font-display mb-4 text-2xl font-semibold tracking-tight text-ink">{yearGroup.year}</h2>
           <div class="space-y-6">
             {yearGroup.months.map((monthGroup) => (
               <div>
-                <h3 class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500">
+                <h3 class="mb-2 text-xs font-semibold tracking-wide text-accent">
                   {monthGroup.month} 月 — {monthGroup.posts.length} 篇
                 </h3>
                 <div class="space-y-2">
                   {monthGroup.posts.map((post) => (
                     <a
                       href={`/blog/${post.id}`}
-                      class="group flex items-center justify-between border border-black px-4 py-3 transition-colors hover:bg-gray-100"
+                      class="group card-surface flex items-center justify-between px-4 py-3 transition-colors hover:border-accent"
                     >
-                      <span class="text-sm font-medium group-hover:underline">
+                      <span class="text-sm font-medium text-ink group-hover:text-accent transition-colors">
                         {post.data.title}
                       </span>
-                      <span class="text-xs text-gray-400">
+                      <span class="text-xs text-muted">
                         {post.data.date.toLocaleDateString('zh-CN', {
                           month: '2-digit',
                           day: '2-digit',
@@ -80,8 +87,8 @@ const totalPosts = sortedPosts.length;
       ))}
     </div>
   ) : (
-    <div class="border border-black p-12 text-center">
-      <p class="text-sm text-gray-500">暂无文章</p>
+    <div class="card-surface p-12 text-center">
+      <p class="text-sm text-muted">暂无文章</p>
     </div>
   )}
 </BaseLayout>

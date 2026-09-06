@@ -1,5 +1,5 @@
 /**
- * 极简博客岚潮的小窝 — 配置中心
+ * 岚潮的小窝 — 配置中心
  *
  * 所有配置按分类放在 src/config/ 目录下，
  * 修改对应文件即可自定义博客的各个部分。
@@ -11,11 +11,14 @@ export type { SiteInfo } from './site';
 export { author } from './author';
 export type { AuthorInfo } from './author';
 
-export { nav } from './nav';
+export { nav, more } from './nav';
 export type { NavItem } from './nav';
 
 export { social } from './social';
 export type { SocialLink } from './social';
+
+export { daily } from './daily';
+export type { DailyConfig } from './daily';
 
 export { comment } from './comment';
 export type { CommentConfig } from './comment';

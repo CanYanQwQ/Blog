@@ -28,12 +28,12 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
   tags={post.data.tags}
   searchScope="blog"
 >
-  <article class="md:grid md:grid-cols-[1fr_200px] md:gap-8">
+  <article class="md:grid md:grid-cols-[1fr_220px] md:gap-10">
     <div>
-      <header class="mb-8 border-b border-black pb-6">
-        <div class="mb-2 flex flex-wrap items-center gap-2 text-xs uppercase tracking-wider text-gray-500">
+      <header class="mb-8 border-b border-line pb-6">
+        <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted">
           {post.data.category && (
-            <span class="border border-gray-300 px-2 py-0.5">{post.data.category}</span>
+            <span class="rounded-inner border border-accent/30 px-2 py-0.5 text-accent">{post.data.category}</span>
           )}
           {post.data.author && (
             <span class="flex items-center gap-1">
@@ -43,11 +43,11 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
           )}
         </div>
 
-        <h1 class="mb-3 text-3xl font-bold tracking-tighter">
+        <h1 class="font-display mb-3 text-2xl font-semibold leading-tight tracking-tight text-ink md:text-4xl">
           {post.data.title}
         </h1>
 
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs uppercase tracking-wider text-gray-500">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
           <time datetime={post.data.date.toISOString()}>
             {post.data.date.toLocaleDateString('zh-CN', {
               year: 'numeric',
@@ -66,11 +66,11 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
           )}
           {post.data.tags.length > 0 && (
             <>
-              <span class="text-gray-300">/</span>
+              <span class="text-line">/</span>
               {post.data.tags.map((tag: string) => (
                 <a
                   href={`/blog?tag=${tag}`}
-                  class="border border-gray-300 px-2 py-0.5 text-[10px] transition-colors hover:bg-black hover:text-white"
+                  class="rounded-inner border border-line px-2 py-0.5 text-[10px] text-muted transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground"
                 >
                   {tag}
                 </a>
@@ -90,14 +90,14 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
     <!-- Table of Contents -->
     {toc.length > 0 && (
       <aside class="hidden md:block">
-        <div class="sticky top-24 border border-black p-4 text-sm">
-          <h3 class="mb-3 text-xs font-bold uppercase tracking-wider">目录</h3>
+        <div class="card-surface sticky top-6 p-4 text-sm">
+          <h3 class="font-display mb-3 text-base font-semibold tracking-tight text-ink">目录</h3>
           <ul class="space-y-1.5">
             {toc.map((h) => (
               <li>
                 <a
                   href={`#${h.slug}`}
-                  class={`block text-gray-600 transition-colors hover:text-black ${
+                  class={`block text-muted transition-colors hover:text-accent ${
                     h.depth === 3 ? 'pl-3 text-[11px]' : 'text-xs'
                   }`}
                 >
@@ -111,10 +111,10 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
     )}
   </article>
 
-  <footer class="mt-12 border-t border-black pt-6">
+  <footer class="mt-12 border-t border-line pt-6">
     <a
       href="/blog"
-      class="flex items-center gap-1 text-xs uppercase tracking-wider underline underline-offset-4 transition-colors hover:text-gray-500"
+      class="flex items-center gap-1 text-sm text-accent hover:text-ink transition-colors"
     >
       <Icon name="arrow-left" size={14} />
       返回文章列表

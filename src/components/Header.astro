@@ -1,40 +1,75 @@
 ---
 import Icon from './Icon.astro';
-import GlobalSearch from './GlobalSearch.vue';
-import { site, nav, features } from '../config';
+import { site, nav, more, features } from '../config';
 
-export interface Props {
-  searchItems?: any[];
-}
-
-const { searchItems = [] } = Astro.props;
 const currentPath = Astro.url.pathname;
+const active = (path: string) =>
+  currentPath === path || (path !== '/' && currentPath.startsWith(path));
 ---
 
-<header class="border-b border-black">
-  <div class="mx-auto max-w-4xl px-4 md:px-6">
-    <div class="flex items-center justify-between py-3">
-      <a
-        href="/"
-        class="text-lg font-bold tracking-tighter uppercase hover:opacity-60 transition-colors shrink-0"
-      >
+<!-- Desktop: fixed left sidebar (AcoFork style) — separate bg from content -->
+<header class="sidebar hidden lg:flex lg:w-60 lg:shrink-0 lg:flex-col lg:border-r lg:border-sidebar-line lg:bg-sidebar">
+  <div class="sidebar-inner sticky top-0 flex h-dvh flex-col gap-5 px-2 py-6">
+    <!-- Brand -->
+    <a href="/" class="font-display px-3 pb-1 text-2xl font-semibold tracking-tight text-ink hover:text-accent transition-colors">
+      {site.title}
+    </a>
+
+    <!-- Blog group -->
+    <nav class="flex flex-col gap-0.5">
+      <p class="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">博客区</p>
+      {nav.map((item) => (
+        <a
+          href={item.path}
+          class={`flex items-center gap-2.5 rounded-inner px-3 py-2 text-sm transition-colors ${
+            active(item.path)
+              ? 'bg-accent/10 font-medium text-accent'
+              : 'text-ink/80 hover:bg-soft hover:text-ink'
+          }`}
+        >
+          <Icon name={item.icon} size={16} />
+          <span>{item.label}</span>
+        </a>
+      ))}
+    </nav>
+
+    <!-- More group (empty for now) -->
+    <nav class="flex flex-col gap-0.5">
+      <p class="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">更多</p>
+      {more.map((item) => (
+        <a
+          href={item.path}
+          class={`flex items-center gap-2.5 rounded-inner px-3 py-2 text-sm transition-colors ${
+            active(item.path)
+              ? 'bg-accent/10 font-medium text-accent'
+              : 'text-ink/80 hover:bg-soft hover:text-ink'
+          }`}
+        >
+          <Icon name={item.icon} size={16} />
+          <span>{item.label}</span>
+        </a>
+      ))}
+    </nav>
+
+    <div class="mt-auto flex items-center justify-between px-3">
+      <span class="text-xs text-muted">{site.lang === 'zh-CN' ? '小窝 · 记录与分享' : site.description}</span>
+      {features.darkModeToggle && (
+        <button id="theme-toggle" class="theme-toggle" aria-label="切换主题">
+          <Icon name="sun" size={16} class="sun-icon" />
+          <Icon name="moon" size={16} class="moon-icon" />
+        </button>
+      )}
+    </div>
+  </div>
+</header>
+
+<!-- Mobile: top bar + drawer side nav -->
+<header class="sticky top-0 z-40 border-b border-line bg-paper lg:hidden">
+  <div class="mobile-topbar mx-auto max-w-4xl px-4">
+    <div class="flex items-center justify-between pb-3 pt-3">
+      <a href="/" class="font-display text-xl font-semibold tracking-tight text-ink">
         {site.title}
       </a>
-      <nav class="hidden items-center gap-1 md:flex">
-        {nav.map((item) => (
-          <a
-            href={item.path}
-            class={`flex items-center gap-1.5 px-2.5 py-1 text-sm uppercase tracking-wide transition-colors ${
-              currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path))
-                ? 'bg-black text-white'
-                : 'text-black hover:bg-gray-100'
-            }`}
-          >
-            <Icon name={item.icon} size={14} />
-            <span>{item.label}</span>
-          </a>
-        ))}
-      </nav>
       <div class="flex items-center gap-2">
         {features.darkModeToggle && (
           <button id="theme-toggle" class="theme-toggle" aria-label="切换主题">
@@ -42,35 +77,45 @@ const currentPath = Astro.url.pathname;
             <Icon name="moon" size={16} class="moon-icon" />
           </button>
         )}
-        <button id="mobile-menu-btn" class="block md:hidden" aria-label="菜单">
-          <Icon name="menu" size={20} />
+        <button id="mobile-menu-btn" class="block p-2 text-ink" aria-label="菜单" aria-expanded="false" aria-controls="mobile-menu">
+          <Icon name="menu" size={22} />
         </button>
       </div>
     </div>
-    <!-- Search bar -->
-    {features.search && (
-      <div class="pb-3">
-        <GlobalSearch client:load items={JSON.stringify(searchItems)} />
-      </div>
-    )}
   </div>
-  <!-- Mobile menu -->
-  <div id="mobile-menu" class="hidden border-t border-black md:hidden">
-    <div class="grid grid-cols-2 gap-1 px-4 py-3">
-      {nav.map((item) => (
+
+  <!-- Mobile drawer -->
+  <div id="mobile-menu" class="hidden border-t border-line bg-paper">
+    <div class="px-4 py-3">
+      <p class="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">博客区</p>
+      <nav class="grid grid-cols-2 gap-2">
+        {nav.map((item) => (
           <a
             href={item.path}
-            class={`flex items-center gap-2 px-3 py-2.5 text-sm uppercase tracking-wide border border-gray-200 transition-colors ${
-              currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path))
-                ? 'bg-black text-white'
-                : 'text-black hover:bg-gray-100'
+            class={`flex items-center gap-2 rounded-inner px-3 py-3 text-sm transition-colors ${
+              active(item.path) ? 'bg-accent/10 font-medium text-accent' : 'text-ink hover:bg-soft'
             }`}
           >
             <Icon name={item.icon} size={16} />
             <span>{item.label}</span>
           </a>
-        ))
-      }
+        ))}
+      </nav>
+
+      <p class="mb-1.5 mt-4 px-1 pt-2 text-[11px] font-semibold uppercase tracking-widest text-muted">更多</p>
+      <nav class="grid grid-cols-2 gap-2">
+        {more.map((item) => (
+          <a
+            href={item.path}
+            class={`flex items-center gap-2 rounded-inner px-3 py-3 text-sm transition-colors ${
+              active(item.path) ? 'bg-accent/10 font-medium text-accent' : 'text-ink hover:bg-soft'
+            }`}
+          >
+            <Icon name={item.icon} size={16} />
+            <span>{item.label}</span>
+          </a>
+        ))}
+      </nav>
     </div>
   </div>
 </header>
@@ -79,27 +124,42 @@ const currentPath = Astro.url.pathname;
   // Mobile menu toggle
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
+  function closeMenu() {
+    if (menu) menu.classList.add('hidden');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
   if (btn && menu) {
     btn.addEventListener('click', () => {
+      const isOpen = !menu.classList.contains('hidden');
       menu.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', String(!isOpen));
+    });
+    // Close the drawer after tapping a nav link
+    menu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeMenu);
     });
   }
 
   // Theme toggle
   (function () {
-    const toggle = document.getElementById('theme-toggle');
-    const stored = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initial = stored || (prefersDark ? 'dark' : 'light');
-    setTheme(initial);
+    const toggles = document.querySelectorAll('#theme-toggle');
+    // Initial theme is already applied by BaseLayout; derive state from the DOM
+    // so we don't override the dark-default. Toggle writes the user's choice to localStorage.
+    const apply = () => {
+      toggles.forEach((toggle) => {
+        toggle.setAttribute('aria-pressed', String(document.documentElement.classList.contains('dark')));
+      });
+    };
+    apply();
 
-    if (toggle) {
+    toggles.forEach((toggle) => {
       toggle.addEventListener('click', () => {
         const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
         setTheme(next);
         localStorage.setItem('theme', next);
+        apply();
       });
-    }
+    });
   })();
 
   function setTheme(theme) {

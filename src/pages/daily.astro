@@ -1,22 +1,25 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
-import { getCollection, render } from 'astro:content';
-import { marked } from 'marked';
+import { getCollection } from 'astro:content';
+import { Marked } from 'marked';
 import { daily } from '../config';
 
 const allDaily = (await getCollection('daily')).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 
-// Custom marked renderer to wrap images for consistent display
-const renderer = {
-  image({ href, title, text }) {
-    const titleAttr = title ? ` title="${title}"` : '';
-    return `<div class="note-img-wrap"><img src="${href}" alt="${text}"${titleAttr} loading="lazy" /></div>`;
-  }
-};
-marked.use({ renderer });
+// Image renderer wraps each image for consistent display. It lives on a local
+// instance because `marked` is a module-global singleton and `marked.use()`
+// cannot be undone — mutating the shared one leaks into other prerendered pages.
+const marked = new Marked({
+  renderer: {
+    image({ href, title, text }) {
+      const titleAttr = title ? ` title="${title}"` : '';
+      return `<div class="note-img-wrap"><img src="${href}" alt="${text}"${titleAttr} loading="lazy" /></div>`;
+    },
+  },
+});
 const dailyHtml = await Promise.all(
   allDaily.map(async (d) => ({
     slug: d.id,
@@ -24,15 +27,22 @@ const dailyHtml = await Promise.all(
     html: marked.parse(d.body || ''),
   }))
 );
-marked.use({ renderer: { image: undefined } });
+
+// Days together as of build time, so the heading is correct without JS.
+// The client script below keeps it accurate on the live page.
+const daysAtBuild = Math.floor((Date.now() - new Date(daily.startDate).getTime()) / 86_400_000);
+const headingText = daily.title.replace('{days}', String(daysAtBuild));
 ---
 
 <BaseLayout title="恋爱日常" description="我和宝宝的恋爱日常" searchScope="all">
   <!-- Relationship timer — centered, no card box -->
   <div class="relationship-card mb-12 py-4 text-center" data-start={daily.startDate}>
     <!-- Header -->
-    <h1 class="font-display mx-auto mb-2 max-w-xl text-2xl font-semibold tracking-tight text-ink md:text-3xl">
-      {daily.title}
+    <h1
+      class="font-display mx-auto mb-2 max-w-xl text-2xl font-semibold tracking-tight text-ink md:text-3xl"
+      data-title-template={daily.title}
+    >
+      {headingText}
     </h1>
     <p class="mb-8 flex items-center justify-center gap-2 text-sm text-muted">
       <Icon name="heart" size={14} class="text-accent" />
@@ -156,6 +166,13 @@ marked.use({ renderer: { image: undefined } });
       set('hours', String(hours).padStart(2, '0'));
       set('minutes', String(minutes).padStart(2, '0'));
       set('seconds', String(seconds).padStart(2, '0'));
+
+      // Keep the heading's day count in step with the timer
+      const titleEl = document.querySelector('[data-title-template]');
+      if (titleEl) {
+        const template = titleEl.getAttribute('data-title-template') || '';
+        titleEl.textContent = template.replace('{days}', String(totalDays));
+      }
     }
     updateRelationshipTimer();
     if (!window.relationshipTimerInterval) {

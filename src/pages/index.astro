@@ -2,8 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BlogCard from '../components/BlogCard.astro';
 import Icon from '../components/Icon.astro';
-import { getCollection, render } from 'astro:content';
-import { marked } from 'marked';
+import { getCollection } from 'astro:content';
+import { Marked } from 'marked';
 import { site, author, social } from '../config';
 
 const allPosts = (await getCollection('blog')).filter((p) => !p.data.draft);
@@ -11,19 +11,17 @@ const allNotes = await getCollection('notes');
 const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const sortedNotes = allNotes.sort((a, b) => b.data.date.getTime() - a.data.date.getTime()).slice(0, 3);
 
-// Personal-homepage project destinations (from 个人主页 config)
-const homepageProjects = [
-  { name: '博客', url: 'https://blog.zhouwanx.top' },
-];
-
-// Custom marked renderer to wrap images for golden ratio display
-const renderer = {
-  image({ href, title, text }) {
-    const titleAttr = title ? ` title="${title}"` : '';
-    return `<div class="note-img-wrap"><img src="${href}" alt="${text}"${titleAttr} loading="lazy" /></div>`;
-  }
-};
-marked.use({ renderer });
+// Image renderer wraps each image for golden-ratio sizing. It lives on a local
+// instance because `marked` is a module-global singleton and `marked.use()`
+// cannot be undone — mutating the shared one leaks into other prerendered pages.
+const marked = new Marked({
+  renderer: {
+    image({ href, title, text }) {
+      const titleAttr = title ? ` title="${title}"` : '';
+      return `<div class="note-img-wrap"><img src="${href}" alt="${text}"${titleAttr} loading="lazy" /></div>`;
+    },
+  },
+});
 const notesHtml = await Promise.all(
   sortedNotes.map(async (note) => ({
     slug: note.id,
@@ -31,7 +29,6 @@ const notesHtml = await Promise.all(
     html: marked.parse(note.body || ''),
   }))
 );
-marked.use({ renderer: { image: undefined } });
 ---
 
 <BaseLayout title="首页" searchScope="all">
@@ -89,47 +86,6 @@ marked.use({ renderer: { image: undefined } });
       </div>
     )}
   </section>
-
-  <!-- Projects -->
-  {homepageProjects.length > 0 && (
-    <section class="mb-10 md:mb-12">
-      <div class="mb-4 flex items-center justify-between">
-        <h2 class="font-display flex items-center gap-2 text-xl font-semibold tracking-tight text-ink">
-          项目
-        </h2>
-        <a
-          href="/projects"
-          class="flex items-center gap-1 text-sm text-accent hover:text-ink transition-colors"
-        >
-          查看全部
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </a>
-      </div>
-      <div class="grid gap-4 md:grid-cols-2">
-        {homepageProjects.map((project) => {
-          const hostname = new URL(project.url).hostname;
-          return (
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="card-surface group flex items-center justify-between gap-4 p-5 transition-colors hover:border-accent"
-            >
-              <span class="min-w-0">
-                <strong class="font-display block text-lg font-semibold tracking-tight text-ink group-hover:text-accent transition-colors">
-                  {project.name}
-                </strong>
-                <small class="block overflow-wrap-anywhere text-xs text-muted">{hostname}</small>
-              </span>
-              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-inner border border-line text-muted group-hover:border-accent group-hover:text-accent transition-colors">
-                <Icon name="external-link" size={16} />
-              </span>
-            </a>
-          );
-        })}
-      </div>
-    </section>
-  )}
 
   <!-- Latest Posts -->
   <section class="mb-10 md:mb-12">

@@ -16,7 +16,7 @@ export interface SiteInfo {
 
 export const site: SiteInfo = {
   title: '岚潮的小窝',
-  description: '残颜的博客：无业游民一枚，对 IT 和 AI 上头，日常靠 AGENT 编程自娱自乐。',
+  description: '岚潮的博客：无业游民一枚，对 IT 和 AI 上头，日常靠 AGENT 编程自娱自乐。',
   url: 'https://blog.zhouwanx.top',
   lang: 'zh-CN',
   timezone: 'Asia/Shanghai',

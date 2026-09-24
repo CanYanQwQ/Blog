@@ -1,22 +1,25 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import GlobalSearch from '../components/GlobalSearch.vue';
-import { getCollection, render } from 'astro:content';
-import { marked } from 'marked';
+import { getCollection } from 'astro:content';
+import { Marked } from 'marked';
 import { buildSearchIndex, filterByScope } from '../lib/search';
 
 const allNotes = await getCollection('notes');
 const sortedNotes = allNotes.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const searchItems = filterByScope(await buildSearchIndex(), 'notes');
 
-// Custom marked renderer to wrap images in a container for golden ratio display
-const renderer = {
-  image({ href, title, text }) {
-    const titleAttr = title ? ` title="${title}"` : '';
-    return `<div class="note-img-wrap"><img src="${href}" alt="${text}"${titleAttr} loading="lazy" /></div>`;
-  }
-};
-marked.use({ renderer });
+// Image renderer wraps each image for golden-ratio sizing. It lives on a local
+// instance because `marked` is a module-global singleton and `marked.use()`
+// cannot be undone — mutating the shared one leaks into other prerendered pages.
+const marked = new Marked({
+  renderer: {
+    image({ href, title, text }) {
+      const titleAttr = title ? ` title="${title}"` : '';
+      return `<div class="note-img-wrap"><img src="${href}" alt="${text}"${titleAttr} loading="lazy" /></div>`;
+    },
+  },
+});
 
 const notesHtml = await Promise.all(
   sortedNotes.map(async (note) => ({
@@ -25,8 +28,6 @@ const notesHtml = await Promise.all(
     html: marked.parse(note.body || ''),
   }))
 );
-// Reset renderer to avoid affecting other pages
-marked.use({ renderer: { image: undefined } });
 ---
 
 <BaseLayout title="说说" description="日常随想" searchScope="notes">

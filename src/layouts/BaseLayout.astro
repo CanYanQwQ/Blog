@@ -126,6 +126,11 @@ const structuredData = JSON.stringify({
         }
         if (useDark) {
           document.documentElement.classList.add('dark');
+        } else {
+          // The server renders class="dark" when theme.default is 'dark', so a
+          // visitor who chose light must have it removed here — adding only
+          // would leave every page dark until they clicked the toggle.
+          document.documentElement.classList.remove('dark');
         }
       })();
     </script>

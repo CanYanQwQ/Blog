@@ -15,7 +15,7 @@ export interface AuthorInfo {
 }
 
 export const author: AuthorInfo = {
-  name: '残颜',
+  name: '岚潮',
   email: 'canyan886@gmail.com',
   avatar: '/avatar.jpg',
   role: '无业游民',

@@ -245,12 +245,12 @@ description: 站点描述
 
 | 页面 | 范围 |
 |------|------|
-| 首页、友链 | `all` — 全部内容 |
-| 文章列表、文章详情、归档 | `blog` — 仅文章 |
+| 友链 | `all` — 全部内容 |
+| 文章列表、归档 | `blog` — 仅文章 |
 | 项目 | `projects` — 仅项目 |
 | 说说 | `notes` — 仅说说 |
 
-**Fuse.js 权重：** 标题 2.0、标签 1.5、描述 1.0，阈值 0.4。
+**Fuse.js 权重：** 标题 2.0、关键词/标签 1.5、描述 1.0，阈值 0.4（`GlobalSearch` 的权重字段是 `keywords`，`SearchBar` 是 `tags`）。
 
 `/search` 页面是独立的：它只索引非草稿文章，使用 `SearchBar.vue`，并带有高亮显示。
 
@@ -323,6 +323,8 @@ export const comment = {
   ['path', { d: 'M...' }],
 ],
 ```
+
+**站点图标（favicon）：** 浏览器标签栏图标由 `public/avatar.jpg` 生成——`public/favicon.png`（64×64，`BaseLayout.astro` 引用）和 `public/favicon.ico`（16/32/48/64 多尺寸）。这两个是静态文件，更换头像后不会自动更新，需要重新生成。
 
 ### 主题
 

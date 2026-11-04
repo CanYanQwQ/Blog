@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { init } from '@waline/client';
+import '@waline/client/style';
 
 const props = defineProps<{
   serverURL: string;

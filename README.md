@@ -16,7 +16,6 @@
 - **Markdown 文章** — 通过 Astro Content Collections 管理，支持标签、分类、草稿、自定义作者
 - **全局搜索** — 列表页顶部的下拉搜索框（Vue 3 + Fuse.js），各页面按内容类型过滤
 - **说说（微笔记）** — Markdown 渲染 + 图片，图片自动按黄金比例缩放（φ ≈ 1.618）
-- **恋爱日常** — 实时计时器（年/月/日/时/分/秒）+ 日常记录
 - **GitHub 集成** — 项目页在构建时自动获取仓库星标数、分叉数、语言、Topics
 - **文章归档** — 按年/月分组展示写作时间线
 - **友链系统** — YAML 格式，每文件一条，网格展示
@@ -51,7 +50,6 @@
 | `/archive` | 归档 | 按年/月分组，链接到文章详情 |
 | `/notes` | 说说 | 微笔记列表，支持 Markdown 和图片 |
 | `/friends` | 友链 | 友链网格展示 |
-| `/daily` | 恋爱日常 | 恋爱计时器 + 日常记录 |
 | `/search` | 搜索 | 独立搜索页（`noindex`） |
 | `/rss.xml` | RSS 订阅 | 按发布日期排序 |
 | `/robots.txt` | 爬虫规则 | 指向 sitemap |
@@ -66,10 +64,10 @@
 | [Vue 3](https://vuejs.org) | 交互组件（搜索、评论） |
 | [Tailwind CSS](https://tailwindcss.com) | 原子化 CSS（v4，通过 Vite 插件接入） |
 | [@tailwindcss/typography](https://github.com/tailwindlabs/tailwindcss-typography) | Markdown 文章排版（`prose`） |
-| [marked](https://marked.js.org) | Markdown → HTML（说说 / 恋爱日常页，18.x） |
+| [marked](https://marked.js.org) | Markdown → HTML（说说页，18.x） |
 | [Fuse.js](https://fusejs.io) | 客户端模糊搜索（7.x） |
 | [Lucide](https://lucide.dev) | 图标库（静态 SVG 路径映射） |
-| [Artalk](https://artalk.js.org) | 评论系统（自托管后端） |
+| [Waline](https://waline.js.org) | 评论系统（自托管服务端 + `@waline/client`） |
 | [@astrojs/rss](https://docs.astro.build/en/guides/rss/) | RSS 生成 |
 | [@astrojs/sitemap](https://docs.astro.build/en/guides/integrations-guide/sitemap/) | Sitemap 生成 |
 | [Shiki](https://shiki.style) | 代码高亮（`one-dark-pro`，构建时） |
@@ -112,7 +110,7 @@ npm run astro -- <command>   # Astro CLI 入口
 │   │   ├── CommentSystem.astro  # 评论容器（启用/禁用开关）
 │   │   ├── GlobalSearch.vue     # 列表页下拉搜索
 │   │   ├── SearchBar.vue        # 独立搜索页组件
-│   │   └── ArtalkComments.vue   # Artalk 评论集成
+│   │   └── WalineComments.vue   # 评论组件（Waline，client:load 挂载）
 │   ├── layouts/
 │   │   └── BaseLayout.astro     # 唯一文档外壳（SEO、主题、Header/Footer）
 │   ├── pages/                   # 路由
@@ -123,7 +121,6 @@ npm run astro -- <command>   # Astro CLI 入口
 │   │   ├── archive.astro        # 归档页
 │   │   ├── notes.astro          # 说说页
 │   │   ├── friends.astro        # 友链页
-│   │   ├── daily.astro          # 恋爱日常页
 │   │   ├── search.astro         # 搜索页
 │   │   ├── rss.xml.js           # RSS 端点
 │   │   └── robots.txt.ts        # robots.txt 端点
@@ -193,12 +190,6 @@ date: 2026-01-01 14:30
 - 竖向图片：最大 160×260
 - 移动端：横向 180×110，竖向 110×180
 
-### 恋爱日常 `src/content/daily/*.md`
-
-与说说格式相同（`date` + 正文），渲染在 `/daily` 页面。
-
-计时器起始日期和标题在 `src/config/daily.ts` 配置。标题支持 `{days}` 占位符，会在构建时替换为已在一起的天数，并在客户端由计时器脚本保持同步——不要硬编码天数，否则会和计时器不一致。
-
 ### 友链 `src/content/friends/*.yaml`
 
 每个文件一条：
@@ -223,8 +214,7 @@ description: 站点描述
 | `author.ts` | `name`、`email`、`avatar`、`role`、`bio`、`website` | 作者信息 |
 | `nav.ts` | `nav`、`more` | 导航菜单（两组） |
 | `social.ts` | `label`、`url`、`icon`、`color` | 社交链接（首页展示） |
-| `daily.ts` | `names`、`avatars`、`startDate`、`title` | 恋爱日常 |
-| `comment.ts` | `enabled`、`server`、`site`、`locale` | 评论系统 |
+| `comment.ts` | `enabled`、`server` | 评论系统（Waline） |
 | `theme.ts` | `default` | 默认主题（`light` / `dark` / `auto`，当前为 `dark`） |
 | `blog.ts` | `pageSize` | 文章列表每页条数（**未接线**，列表未分页） |
 | `seo.ts` | `twitterCard`、`ogImage` | SEO 配置 |
@@ -260,22 +250,26 @@ description: 站点描述
 
 ## 评论系统
 
-通过 `src/config/comment.ts` 控制，当前使用 **Artalk**：
+通过 `src/config/comment.ts` 控制，当前使用 **Waline**（自托管评论服务端，部署在 `https://waline.zhouwanx.top`）：
 
 ```ts
 export const comment = {
   enabled: true,
-  server: 'https://artalk.zhouwanx.top',  // Artalk 后端地址
-  site: '博客',                            // Artalk 后台创建的站点名
-  locale: 'zh-CN',
+  server: 'https://waline.zhouwanx.top', // Waline 服务端地址
 };
 ```
 
-评论只渲染在**文章详情页**。Artalk 的脚本和样式在运行时从 unpkg 注入，因此需要访客能访问外网。
+评论只渲染在**文章详情页**。`CommentSystem.astro` 挂载 `WalineComments.vue`（`client:load`），由 `@waline/client` 在浏览器中初始化；每篇文章的评论按页面路径（`path`）隔离。
 
-`server` 留空或包含 `xxx` 时，评论区会显示配置提示。
+客户端设置：禁止上传图片（`imageUploader: false`）、跟随站点明暗主题（`dark: 'html.dark'`）、昵称/邮箱必填（`requiredMeta: ['nick', 'mail']`）、关闭表情与搜索。
 
-`src/components/WalineComments.vue` 是备选方案，但 `CommentSystem.astro` 并未挂载它。
+服务端要点（`waline.zhouwanx.top`，Docker 部署在 156.239.227.123:8360）：
+- **强制登录**：`LOGIN=force`，匿名评论返回 401。
+- 数据库：SQLite（`/opt/waline/data/waline.sqlite`，官方种子库初始化）。
+- 域名白名单：`SECURE_DOMAINS=blog.zhouwanx.top,waline.zhouwanx.top`，非白名单来源请求会被拒绝。
+- 管理后台：<https://waline.zhouwanx.top/ui/>，首个注册用户自动成为管理员。
+
+`comment.server` 留空时，评论区会显示配置提示。
 
 ---
 
@@ -365,7 +359,7 @@ export const social: SocialLink[] = [
 3. 如需导航入口，在 `src/config/nav.ts` 添加菜单项
 4. 如需新内容类型，在 `src/content.config.ts` 添加集合
 
-**渲染 Markdown 时请注意：** 项目有两条渲染路径。文章详情页用 Astro 的 `render()`；首页、说说页、恋爱日常页用 `marked` 的**局部实例**。不要改回共享的 `marked.use()` 全局调用——`marked` 导出的是模块级单例，`use()` 无法撤销，会污染其他页面并导致构建失败（详见 `AGENTS.md` 的构建陷阱）。
+**渲染 Markdown 时请注意：** 项目有两条渲染路径。文章详情页用 Astro 的 `render()`；首页、说说页用 `marked` 的**局部实例**。不要改回共享的 `marked.use()` 全局调用——`marked` 导出的是模块级单例，`use()` 无法撤销，会污染其他页面并导致构建失败（详见 `AGENTS.md` 的构建陷阱）。
 
 ---
 
@@ -375,9 +369,9 @@ export const social: SocialLink[] = [
 
 `projects`、`notes`、`friends` 目录不存在或为空。属正常现象，添加内容后消失。
 
-### 评论显示「已启用但尚未配置服务端地址」？
+### 评论显示「已启用但尚未配置 Waline 服务端地址」？
 
-编辑 `src/config/comment.ts`，把 `server` 设为真实的 Artalk 后端地址（当前值包含 `xxx` 占位时会触发该提示）。
+编辑 `src/config/comment.ts`，把 `server` 设为真实的 Waline 服务端地址（留空会触发该提示）。
 
 ### 如何部署？
 

@@ -17,9 +17,6 @@ export type { NavItem } from './nav';
 export { social } from './social';
 export type { SocialLink } from './social';
 
-export { daily } from './daily';
-export type { DailyConfig } from './daily';
-
 export { comment } from './comment';
 export type { CommentConfig } from './comment';
 

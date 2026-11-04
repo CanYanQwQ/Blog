@@ -29,13 +29,6 @@ const notes = defineCollection({
   }),
 });
 
-const daily = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/daily' }),
-  schema: z.object({
-    date: z.date(),
-  }),
-});
-
 const friends = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/friends' }),
   schema: z.object({
@@ -45,4 +38,4 @@ const friends = defineCollection({
   }),
 });
 
-export const collections = { blog, projects, notes, daily, friends };
+export const collections = { blog, projects, notes, friends };

@@ -19,6 +19,4 @@ export const nav: NavItem[] = [
 ];
 
 /** 「更多」分组 */
-export const more: NavItem[] = [
-  { label: '恋爱日常', path: '/daily', icon: 'heart' },
-];
+export const more: NavItem[] = [];

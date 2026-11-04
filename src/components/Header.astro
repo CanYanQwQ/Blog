@@ -33,23 +33,25 @@ const active = (path: string) =>
       ))}
     </nav>
 
-    <!-- More group (empty for now) -->
-    <nav class="flex flex-col gap-0.5">
-      <p class="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">更多</p>
-      {more.map((item) => (
-        <a
-          href={item.path}
-          class={`flex items-center gap-2.5 rounded-inner px-3 py-2 text-sm transition-colors ${
-            active(item.path)
-              ? 'bg-accent/10 font-medium text-accent'
-              : 'text-ink/80 hover:bg-soft hover:text-ink'
-          }`}
-        >
-          <Icon name={item.icon} size={16} />
-          <span>{item.label}</span>
-        </a>
-      ))}
-    </nav>
+    <!-- More group -->
+    {more.length > 0 && (
+      <nav class="flex flex-col gap-0.5">
+        <p class="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">更多</p>
+        {more.map((item) => (
+          <a
+            href={item.path}
+            class={`flex items-center gap-2.5 rounded-inner px-3 py-2 text-sm transition-colors ${
+              active(item.path)
+                ? 'bg-accent/10 font-medium text-accent'
+                : 'text-ink/80 hover:bg-soft hover:text-ink'
+            }`}
+          >
+            <Icon name={item.icon} size={16} />
+            <span>{item.label}</span>
+          </a>
+        ))}
+      </nav>
+    )}
 
     <div class="mt-auto flex items-center justify-between px-3">
       <span class="text-xs text-muted">{site.lang === 'zh-CN' ? '小窝 · 记录与分享' : site.description}</span>
@@ -102,20 +104,24 @@ const active = (path: string) =>
         ))}
       </nav>
 
-      <p class="mb-1.5 mt-4 px-1 pt-2 text-[11px] font-semibold uppercase tracking-widest text-muted">更多</p>
-      <nav class="grid grid-cols-2 gap-2">
-        {more.map((item) => (
-          <a
-            href={item.path}
-            class={`flex items-center gap-2 rounded-inner px-3 py-3 text-sm transition-colors ${
-              active(item.path) ? 'bg-accent/10 font-medium text-accent' : 'text-ink hover:bg-soft'
-            }`}
-          >
-            <Icon name={item.icon} size={16} />
-            <span>{item.label}</span>
-          </a>
-        ))}
-      </nav>
+      {more.length > 0 && (
+        <>
+          <p class="mb-1.5 mt-4 px-1 pt-2 text-[11px] font-semibold uppercase tracking-widest text-muted">更多</p>
+          <nav class="grid grid-cols-2 gap-2">
+            {more.map((item) => (
+              <a
+                href={item.path}
+                class={`flex items-center gap-2 rounded-inner px-3 py-3 text-sm transition-colors ${
+                  active(item.path) ? 'bg-accent/10 font-medium text-accent' : 'text-ink hover:bg-soft'
+                }`}
+              >
+                <Icon name={item.icon} size={16} />
+                <span>{item.label}</span>
+              </a>
+            ))}
+          </nav>
+        </>
+      )}
     </div>
   </div>
 </header>

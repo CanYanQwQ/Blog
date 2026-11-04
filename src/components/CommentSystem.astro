@@ -1,16 +1,16 @@
 ---
-import ArtalkComments from './ArtalkComments.vue';
 import { comment as commentCfg } from '../config';
+import WalineComments from './WalineComments.vue';
 
 const comment = commentCfg;
-const enabled = comment.enabled && comment.server && !comment.server.includes('xxx');
+const enabled = comment.enabled && Boolean(comment.server);
 const path = Astro.url.pathname;
 ---
 
 {enabled && (
   <section class="comment-system mt-12 border-t border-line pt-8">
     <h3 class="font-display mb-6 text-lg font-semibold tracking-tight">评论</h3>
-    <ArtalkComments client:load server={comment.server} site={comment.site} locale={comment.locale} path={path} />
+    <WalineComments client:load serverURL={comment.server} path={path} />
   </section>
 )}
 
@@ -18,7 +18,7 @@ const path = Astro.url.pathname;
   <section class="comment-system mt-12 border-t border-line pt-8">
     <h3 class="font-display mb-6 text-lg font-semibold tracking-tight">评论</h3>
     <div class="card-surface p-6 text-center text-sm text-muted">
-      <p>评论系统已启用，但尚未配置服务端地址。</p>
+      <p>评论系统已启用，但尚未配置 Waline 服务端地址。</p>
       <p class="mt-2">
         请编辑 <code class="rounded-inner bg-soft px-1">src/config/comment.ts</code> 中的
         <code class="rounded-inner bg-soft px-1">comment.server</code>
